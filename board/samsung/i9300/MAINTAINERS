@@ -1,0 +1,6 @@
+Samsung i9300 Board
+M:	Simon Shields <simon@lineageos.org>
+S:	Maintained
+F:	board/samsung/i9300/
+F:	include/configs/i9300.h
+F:	configs/i9300_defconfig

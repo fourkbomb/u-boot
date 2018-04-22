@@ -1,0 +1,10 @@
+
+/dts-v1/;
+#include "exynos4412.dtsi"
+
+/ {
+	model = "Samsung GT-I9300 based on Exynos4412";
+
+	compatible = "samsung,i9300", "samsung,exynos4412", "samsung,exynos4";
+
+};
