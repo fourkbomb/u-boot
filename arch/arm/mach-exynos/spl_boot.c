@@ -186,6 +186,7 @@ void copy_uboot_to_ram(void)
 
 	u32 (*copy_bl2)(u32 offset, u32 nblock, u32 dst) = NULL;
 	u32 offset = 0, size = 0;
+	u32 ret;
 #ifdef CONFIG_SPI_BOOTING
 	struct spl_machine_param *param = spl_get_machine_params();
 #endif
@@ -220,23 +221,29 @@ void copy_uboot_to_ram(void)
 		exynos_spi_copy(param->uboot_size, CONFIG_SYS_TEXT_BASE);
 		break;
 #endif
-	case BOOT_MODE_SD:
-		offset = BL2_START_OFFSET;
-		size = BL2_SIZE_BLOC_COUNT;
-		copy_bl2 = get_irom_func(MMC_INDEX);
-		break;
 #ifdef CONFIG_SUPPORT_EMMC_BOOT
 	case BOOT_MODE_EMMC:
+	case BOOT_MODE_EMMC_SD:
 		/* Set the FSYS1 clock divisor value for EMMC boot */
 		emmc_boot_clk_div_set();
 
 		copy_bl2_from_emmc = get_irom_func(EMMC44_INDEX);
 		end_bootop_from_emmc = get_irom_func(EMMC44_END_INDEX);
 
-		copy_bl2_from_emmc(BL2_SIZE_BLOC_COUNT, CONFIG_SYS_TEXT_BASE);
+		ret = copy_bl2_from_emmc(BL2_SIZE_BLOC_COUNT, CONFIG_SYS_TEXT_BASE);
 		end_bootop_from_emmc();
-		break;
+
+		if (bootmode == BOOT_MODE_EMMC || ret)
+			break;
+		/* Fall through if EMMC boot failed and SD boot is enabled */
+#else
+	case BOOT_MODE_EMMC_SD:
 #endif
+	case BOOT_MODE_SD:
+		offset = BL2_START_OFFSET;
+		size = BL2_SIZE_BLOC_COUNT;
+		copy_bl2 = get_irom_func(MMC_INDEX);
+		break;
 #ifdef CONFIG_USB_BOOTING
 	case BOOT_MODE_USB:
 		/*
