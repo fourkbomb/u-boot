@@ -9,6 +9,12 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
+int get_board_rev(void)
+{
+	// TODO: GPM1[5:2]
+	return 0;
+}
+
 int exynos_init(void)
 {
 	gd->ram_size = 0x4000000;
