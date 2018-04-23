@@ -13,6 +13,7 @@ ifdef CONFIG_SPL_BUILD
 obj-$(CONFIG_EXYNOS5)	+= clock_init_exynos5.o
 obj-$(CONFIG_EXYNOS5)	+= dmc_common.o dmc_init_ddr3.o
 obj-$(CONFIG_EXYNOS4210)+= dmc_init_exynos4210.o clock_init_exynos4210.o
+obj-$(CONFIG_EXYNOS4412)+= dmc_init_exynos4412.o clock_init_exynos4412.o
 obj-y	+= spl_boot.o tzpc.o
 obj-y	+= lowlevel_init.o
 endif
