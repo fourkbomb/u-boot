@@ -183,7 +183,7 @@ static void exynos_spi_copy(unsigned int uboot_size, unsigned int uboot_addr)
 */
 void copy_uboot_to_ram(void)
 {
-	unsigned int bootmode = BOOT_MODE_OM;
+	unsigned int bootmode = BOOT_MODE_SD;
 
 	u32 (*copy_bl2)(u32 offset, u32 nblock, u32 dst) = NULL;
 	u32 offset = 0, size = 0;
