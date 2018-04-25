@@ -50,6 +50,10 @@ lowlevel_init:
 
     bl uart_asm_init
 
+#ifndef CONFIG_SPL_BUILD
+    b not_spl
+#endif
+
     bl mem_asm_init
 
     bl system_clock_init_asm
@@ -80,12 +84,32 @@ uart_bl2_put:
 9:    subs r0, r0, #1
     bne 9b
 
-    b uart_bl2_put
-
-not_spl:
     pop {pc}
 
-uart_putc:
+not_spl:
+    mov r0, #'X'
+    bl uart_putc
+    mov r0, #'L'
+    bl uart_putc
+    mov r0, #'3'
+    bl uart_putc
+    mov r0, #' '
+    bl uart_putc
+    mov r0, #'!'
+    bl uart_putc
+    mov r0, #' '
+    bl uart_putc
+    mov r0, #'B'
+    bl uart_putc
+    mov r0, #'3'
+    bl uart_putc
+
+    pop {pc}
+
+
+
+.globl uart_putc
+uart_putc: @ ARM calling convention: must preserve r4-r11
     mov r2, r0
     ldr r0, =UART2_BASE
 1:

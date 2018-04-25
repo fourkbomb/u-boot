@@ -225,6 +225,7 @@ void copy_uboot_to_ram(void)
 #ifdef CONFIG_SUPPORT_EMMC_BOOT
 	case BOOT_MODE_EMMC:
 	case BOOT_MODE_EMMC_SD:
+		printascii("trying EMMC\n");
 		/* Set the FSYS1 clock divisor value for EMMC boot */
 		emmc_boot_clk_div_set();
 
@@ -241,8 +242,19 @@ void copy_uboot_to_ram(void)
 	case BOOT_MODE_EMMC_SD:
 #endif
 	case BOOT_MODE_SD:
+		printascii("booting from SD\n");
+		printascii("first two bytes now:\n");
+		printhex2(((char *)CONFIG_SYS_TEXT_BASE)[0]);
+		printascii(" ");
+		printhex2(((char *)CONFIG_SYS_TEXT_BASE)[1]);
+		printascii("\n");
 		offset = BL2_START_OFFSET;
 		size = BL2_SIZE_BLOC_COUNT;
+		printascii("offset/size:");
+		printhex4(offset);
+		printascii("/");
+		printhex4(size);
+		printascii("\n");
 		copy_bl2 = get_irom_func(MMC_INDEX);
 		break;
 #ifdef CONFIG_USB_BOOTING
@@ -258,11 +270,22 @@ void copy_uboot_to_ram(void)
 		break;
 #endif
 	default:
+		printascii("bad boot mode!\n");
 		break;
 	}
 
+	printascii("copy_bl2:");
+	printhex8(copy_bl2);
+	printascii(" copy to:");
+	printhex8(CONFIG_SYS_TEXT_BASE);
+	printascii("\n");
 	if (copy_bl2)
 		copy_bl2(offset, size, CONFIG_SYS_TEXT_BASE);
+	else
+		printascii("not copying anything\n");
+
+	char *b = (char *)CONFIG_SYS_TEXT_BASE;
+	b[0] = 0xdd;
 }
 
 void memzero(void *s, size_t n)
@@ -300,8 +323,20 @@ void board_init_f(unsigned long bootflag)
 	if (do_lowlevel_init())
 		power_exit_wakeup();
 
+	printascii("copy uboot to ram\n");
 	copy_uboot_to_ram();
 
+	char *byte = (char *)CONFIG_SYS_TEXT_BASE;
+	printascii("here's some bytes: ");
+	for (int i = 0; i < 8192; i++) {
+		printhex2(byte[i]);
+		printascii(" ");
+		if ((i+1) % 0x20 == 0)
+			printascii("\n");
+	}
+	printascii("\n");
+
+	printascii("booting u-boot!\n");
 	/* Jump to U-Boot image */
 	uboot = (void *)CONFIG_SYS_TEXT_BASE;
 	(*uboot)();

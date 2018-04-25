@@ -226,5 +226,6 @@ int do_lowlevel_init(void)
 		tzpc_init();
 	}
 
+	printascii("lowlevel_init done\n");
 	return actions & DO_WAKEUP;
 }

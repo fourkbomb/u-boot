@@ -33,6 +33,7 @@
 #define CLK_SRC_TOP0_OFFSET		0x0C210
 #define CLK_SRC_TOP1_OFFSET		0x0C214
 #define CLK_SRC_FSYS_OFFSET		0x0C240
+#define CLK_DIV_FSYS2_OFFSET    0x0C548
 #define CLK_SRC_PERIL0_OFFSET		0x0C250
 #define CLK_DIV_TOP_OFFSET		0x0C510
 #define CLK_DIV_FSYS1_OFFSET		0x0C544
@@ -327,6 +328,12 @@ skip_mpll:
 	ldr	r1, =0x00202533
 	ldr	r2, =DMC_MEMCONTROL
 	str	r1, [r0, r2]
+
+    ldr r0, =ELFIN_CLOCK_BASE
+    ldr r2, =CLK_DIV_FSYS2_OFFSET
+    ldr r1, [r0, r2]
+    orr r1, r1, #0xf
+    str r1, [r0, r2] @ MMC2_RATIO
 
 v310_2:
 	pop	{pc}
