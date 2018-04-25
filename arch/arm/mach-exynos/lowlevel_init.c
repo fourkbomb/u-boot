@@ -214,7 +214,7 @@ int do_lowlevel_init(void)
 		set_ps_hold_ctrl();
 
 	if (actions & DO_CLOCKS) {
-		system_clock_init();
+		//system_clock_init();
 #ifdef CONFIG_DEBUG_UART
 #if (defined(CONFIG_SPL_BUILD) && defined(CONFIG_SPL_SERIAL_SUPPORT)) || \
     !defined(CONFIG_SPL_BUILD)
@@ -222,7 +222,7 @@ int do_lowlevel_init(void)
 		debug_uart_init();
 #endif
 #endif
-		mem_ctrl_init(actions & DO_MEM_RESET);
+		//mem_ctrl_init(actions & DO_MEM_RESET);
 		tzpc_init();
 	}
 
