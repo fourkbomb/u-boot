@@ -281,11 +281,7 @@ void copy_uboot_to_ram(void)
 	printascii("\n");
 	if (copy_bl2)
 		copy_bl2(offset, size, CONFIG_SYS_TEXT_BASE);
-	else
-		printascii("not copying anything\n");
 
-	char *b = (char *)CONFIG_SYS_TEXT_BASE;
-	b[0] = 0xdd;
 }
 
 void memzero(void *s, size_t n)
@@ -328,7 +324,7 @@ void board_init_f(unsigned long bootflag)
 
 	char *byte = (char *)CONFIG_SYS_TEXT_BASE;
 	printascii("here's some bytes: ");
-	for (int i = 0; i < 8192; i++) {
+	for (int i = 0; i < 1024; i++) {
 		printhex2(byte[i]);
 		printascii(" ");
 		if ((i+1) % 0x20 == 0)
