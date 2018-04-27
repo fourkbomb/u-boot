@@ -7,4 +7,16 @@
 
 	compatible = "samsung,i9300", "samsung,exynos4412", "samsung,exynos4";
 
+	aliases {
+		serial0 = "/serial@13820000";
+	};
+
+	chosen {
+		stdout-path = "serial0:115200n8";
+	};
+
+};
+
+&serial_2 {
+	status = "okay";
 };
