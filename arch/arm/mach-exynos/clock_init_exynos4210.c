@@ -30,7 +30,7 @@
 #include <asm/arch/clk.h>
 #include <asm/arch/clock.h>
 #include "common_setup.h"
-#include "exynos4_setup.h"
+#include "exynos4210_setup.h"
 
 /*
  * system_clock_init: Initialize core clock and bus clock.
