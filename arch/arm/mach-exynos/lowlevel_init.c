@@ -223,7 +223,7 @@ int do_lowlevel_init(void)
 #endif
 #endif
 		mem_ctrl_init(actions & DO_MEM_RESET);
-		tzpc_init();
+		//tzpc_init();
 	}
 
 	return actions & DO_WAKEUP;
