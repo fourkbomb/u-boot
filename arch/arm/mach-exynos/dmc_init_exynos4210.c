@@ -26,7 +26,7 @@
 #include <config.h>
 #include <asm/arch/dmc.h>
 #include "common_setup.h"
-#include "exynos4_setup.h"
+#include "exynos4210_setup.h"
 
 struct mem_timings mem = {
 	.direct_cmd_msr = {
