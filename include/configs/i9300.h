@@ -48,7 +48,7 @@
 
 
 /* Boot off EMMC */
-/*#define CONFIG_SUPPORT_EMMC_BOOT*/
+#define CONFIG_SUPPORT_EMMC_BOOT
 
 #include <linux/sizes.h>
 
