@@ -76,6 +76,14 @@ config DM_REGULATOR_MAX77686
 	features for REGULATOR MAX77686. The driver implements get/set api for:
 	value, enable and mode.
 
+config DM_REGULATOR_MAX77693
+	bool "Enable Driver Model for REGULATOR MAX77693"
+	depends on DM_REGULATOR && DM_PMIC_MAX77693
+	---help---
+	This config enables implementation of driver-model regulator uclass
+	features for REGULATOR MAX77693. The driver implements get/set api for:
+	voltage and enable (for SAFEOUT regulators), current and enable (for CHARGER regulators).
+
 config DM_REGULATOR_FAN53555
 	bool "Enable Driver Model for REGULATOR FAN53555"
 	depends on DM_PMIC_FAN53555

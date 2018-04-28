@@ -21,6 +21,7 @@
 #define MAX77693_CHG_CNFG_00	0xB7
 #define MAX77693_CHG_CNFG_02	0xB9
 #define MAX77693_CHG_CNFG_06	0xBD
+#define MAX77693_CHG_CNFG_09	0xC0
 #define MAX77693_SAFEOUT	0xC6
 
 #define PMIC_NUM_OF_REGS	0xC7
@@ -36,5 +37,10 @@
 
 #define MAX77693_PMIC_I2C_ADDR	(0xCC >> 1)
 
+#define MAX77693_SAFEOUT_DRIVER "max77693_reg_safeout"
+#define MAX77693_CHARGER_DRIVER "max77693_reg_charger"
+
+#ifndef CONFIG_PMIC_DM_MAX77693
 int pmic_init_max77693(unsigned char bus);
+#endif
 #endif /* __MAX77693_PMIC_H_ */
