@@ -108,3 +108,14 @@ void system_clock_init(void)
 	fsys2_div |= 0xf;
 	writel(fsys2_div, &clk->div_fsys2);
 }
+
+void emmc_boot_clk_div_set(void)
+{
+	struct exynos4x12_clock *clk = (struct exynos4x12_clock *)samsung_get_base_clock();
+	u32 div_fsys3 = readl(&clk->div_fsys3);
+
+	div_fsys3 &= ~(0xff0f);
+	div_fsys3 |= (1 << 8) | 0x7;
+
+	writel(div_fsys3, &clk->div_fsys3);
+}
