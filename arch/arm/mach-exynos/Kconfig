@@ -49,6 +49,9 @@ endchoice
 
 if ARCH_EXYNOS4
 
+config EXYNOS4412
+	bool
+
 choice
 	prompt "EXYNOS4 board select"
 
@@ -66,16 +69,20 @@ config TARGET_S5PC210_UNIVERSAL
 config TARGET_ORIGEN
 	bool "Exynos4412 Origen board"
 	select SUPPORT_SPL
+	select EXYNOS4412
 
 config TARGET_TRATS2
 	bool "Exynos4412 Trat2 board"
+	select EXYNOS4412
 
 config TARGET_ODROID
 	bool "Exynos4412 Odroid board"
+	select EXYNOS4412
 
 config TARGET_I9300
 	bool "Exynos4412 i9300 board"
 	select SUPPORT_SPL
+	select EXYNOS4412
 
 endchoice
 endif
