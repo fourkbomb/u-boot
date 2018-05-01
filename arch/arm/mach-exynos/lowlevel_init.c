@@ -197,6 +197,7 @@ int do_lowlevel_init(void)
 
 	reset_status = get_reset_status();
 
+
 	switch (reset_status) {
 	case S5P_CHECK_SLEEP:
 		actions = DO_CLOCKS | DO_WAKEUP;
@@ -222,10 +223,10 @@ int do_lowlevel_init(void)
 		debug_uart_init();
 #endif
 #endif
+
 		mem_ctrl_init(actions & DO_MEM_RESET);
 		//tzpc_init();
 	}
 
-	printascii("lowlevel_init done\n");
 	return actions & DO_WAKEUP;
 }
