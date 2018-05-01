@@ -82,5 +82,6 @@ U_BOOT_DRIVER(pmic_max77693) = {
 	.name = "max77693_pmic",
 	.id = UCLASS_PMIC,
 	.of_match = max77693_ids,
+	.bind = max77693_bind,
 	.ops = &max77693_ops,
 };
