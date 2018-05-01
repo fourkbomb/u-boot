@@ -5,3 +5,4 @@
 #
 
 obj-$(CONFIG_DM_EXTCON) += extcon-uclass.o
+obj-$(CONFIG_DM_EXTCON_MAX77693) += max77693.o
