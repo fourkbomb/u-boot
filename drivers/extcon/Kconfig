@@ -1,0 +1,13 @@
+menu "Extcon support"
+
+config DM_EXTCON
+	bool "Enable Driver Model for external connector drivers (UCLASS_EXTCON)"
+	depends on DM
+	---help---
+	This config enables driver-model support for extcon devices, which provide
+	an interface to get information about currently plugged in cables.
+	For more information, see these files:
+	- 'include/extcon.h'
+	- 'drivers/extcon/extcon-uclass.c'
+
+endmenu
