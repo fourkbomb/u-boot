@@ -32,7 +32,7 @@ static void exynos4_mipi_phy_control(unsigned int dev_index,
 
 void set_mipi_phy_ctrl(unsigned int dev_index, unsigned int enable)
 {
-	if (cpu_is_exynos4())
+	if (proid_is_exynos4210())
 		exynos4_mipi_phy_control(dev_index, enable);
 }
 
@@ -224,10 +224,17 @@ static uint32_t exynos5_get_reset_status(void)
 
 static uint32_t exynos4_get_reset_status(void)
 {
-	struct exynos4_power *power =
-		(struct exynos4_power *)samsung_get_base_power();
+	if (proid_is_exynos4210()) {
+		struct exynos4_power *power =
+			(struct exynos4_power *)samsung_get_base_power();
 
-	return power->inform1;
+		return power->inform1;
+	} else {
+		struct exynos4412_power *power =
+			(struct exynos4412_power *)samsung_get_base_power();
+
+		return power->inform1;
+	}
 }
 
 uint32_t get_reset_status(void)
