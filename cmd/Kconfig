@@ -670,6 +670,13 @@ config CMD_DM
 	  can be useful to see the state of driver model for debugging or
 	  interest.
 
+config CMD_EXTCON
+	bool "extcon - information about extcon devices"
+	depends on DM_EXTCON
+	default y
+	help
+	  Provides access to information regarding extcon devices present on the system.
+
 config CMD_FASTBOOT
 	bool "fastboot - Android fastboot support"
 	depends on FASTBOOT
