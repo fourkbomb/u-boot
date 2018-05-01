@@ -79,6 +79,7 @@ obj-$(CONFIG_BOOTCOUNT_LIMIT) += bootcount/
 obj-y += cache/
 obj-$(CONFIG_CPU) += cpu/
 obj-y += crypto/
+obj-$(CONFIG_DM_EXTCON) += extcon/
 obj-$(CONFIG_FASTBOOT) += fastboot/
 obj-$(CONFIG_FPGA) += fpga/
 obj-y += misc/
