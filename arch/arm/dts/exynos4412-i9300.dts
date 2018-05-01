@@ -33,8 +33,17 @@
 		#address-cells = <1>;
 		#size-cells = <0>;
 
-		max77693@66 {
-			compatible = "maxim,max77693";
+		max77693_muic@25 {
+			compatible = "maxim,max77693-muic";
+			reg = <0x25>;
+
+			muic-max77693 {
+				/* empty node to allow probing */
+			};
+		};
+
+		max77693_charger@66 {
+			compatible = "maxim,max77693-charger";
 			interrupt-parent = <&gpx1>;
 			interrupts = <5 2>;
 			reg = <0x66>;
