@@ -32,19 +32,12 @@
 #include "common_setup.h"
 #include "exynos4412_setup.h"
 
-/*
- * TODO: change all clock sources, then change clock dividers.
- */
 void system_clock_init(void)
 {
 	struct exynos4x12_clock *clk =
 		(struct exynos4x12_clock *)samsung_get_base_clock();
 	struct exynos4412_power *power =
 		(struct exynos4412_power *)samsung_get_base_power();
-#if 0
-	struct exynos4_dmc *dmc = (struct exynos4_dmc *)samsung_get_base_dmc_ctrl();
-	struct exynos4_dmc *dmc1 = (struct exynos4_dmc *)(samsung_get_base_dmc_ctrl() + DMC_OFFSET);
-#endif
 
 	/* Set up UART */
 
@@ -116,37 +109,6 @@ void system_clock_init(void)
 	/* new MMC2 div is 16 */
 	fsys2_div |= 0xf;
 	writel(fsys2_div, &clk->div_fsys2);
-
-	/*check C2C_CTRL enable bit */
-	if ((readl(&power->c2c_ctrl) & 1) != 0)
-		return;
-#if 0
-	writel(PHYCONTROL0_VAL, &dmc->phycontrol0);
-	writel(MEM_TERM_EN | PHY_READ_EN | CTRL_SHGATE | CTRL_REF(8) | CTRL_SHIFTC(4), &dmc->phycontrol1);
-	writel(PHYCONTROL0_VAL | CTRL_DLL_START, &dmc->phycontrol0);
-	sdelay(0x20000);
-
-	writel(CTRL_REF(8) | CTRL_SHIFTC(4), &dmc->phycontrol1);
-	writel(CTRL_REF(8) | FP_RESYNC | CTRL_SHIFTC(4), &dmc->phycontrol1);
-
-	sdelay(0x20000);
-
-	writel(PHYCONTROL0_VAL, &dmc1->phycontrol0);
-	writel(MEM_TERM_EN | PHY_READ_EN | CTRL_SHGATE | CTRL_REF(8) | CTRL_SHIFTC(4), &dmc1->phycontrol1);
-	writel(PHYCONTROL0_VAL | CTRL_DLL_START, &dmc1->phycontrol0);
-	sdelay(0x20000);
-
-	writel(CTRL_REF(8) | CTRL_SHIFTC(4), &dmc1->phycontrol1);
-	writel(CTRL_REF(8) | FP_RESYNC | CTRL_SHIFTC(4), &dmc1->phycontrol1);
-
-	sdelay(0x20000);
-
-	writel(DMC_CONCONTROL, &dmc->concontrol);
-	writel(DMC_CONCONTROL, &dmc1->concontrol);
-
-	writel(DMC_MEMCONTROL, &dmc->memcontrol);
-	writel(DMC_MEMCONTROL, &dmc1->memcontrol);
-#endif 
 }
 
 void emmc_boot_clk_div_set(void)
