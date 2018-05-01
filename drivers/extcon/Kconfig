@@ -10,4 +10,12 @@ config DM_EXTCON
 	- 'include/extcon.h'
 	- 'drivers/extcon/extcon-uclass.c'
 
+config DM_EXTCON_MAX77693
+	bool "Enable Driver Model for MAX77693 extcon"
+	depends on DM_EXTCON
+	depends on DM_PMIC_MAX77693
+	---help---
+	This config enables the driver-model extcon uclass features
+	for MAX77693.
+
 endmenu

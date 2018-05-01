@@ -68,6 +68,9 @@ enum {
 };
 
 #define MAX77693_MUIC_I2C_ADDR	(0x4A >> 1)
+#define MAX77693_MUIC_DRIVER "max77693_extcon"
 
+#ifndef CONFIG_DM_EXTCON_MAX77693
 int power_muic_init(unsigned int bus);
+#endif
 #endif /* __MAX77693_MUIC_H_ */
