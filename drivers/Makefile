@@ -74,6 +74,7 @@ obj-y += block/
 obj-$(CONFIG_BOOTCOUNT_LIMIT) += bootcount/
 obj-$(CONFIG_CPU) += cpu/
 obj-y += crypto/
+obj-$(CONFIG_DM_EXTCON) += extcon/
 obj-$(CONFIG_FASTBOOT) += fastboot/
 obj-y += firmware/
 obj-$(CONFIG_FPGA) += fpga/
