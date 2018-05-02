@@ -382,6 +382,33 @@
 	};
 };
 
+&sdhci0 {
+	samsung,bus-width = <8>;
+	samsung,timing = <1 3 3>;
+	pwr-gpios = <&gpk0 4 0>;
+	status = "disabled";
+};
+
+&sdhci2 {
+	samsung,bus-width = <4>;
+	samsung,timing = <1 2 3>;
+	cd-gpios = <&gpk2 2 0>;
+	status = "okay";
+};
+
 &serial_2 {
 	status = "okay";
 };
+
+&mshc_0 {
+	samsung,bus-width = <8>;
+	samsung,timing = <2 1 0>;
+	samsung,removable = <0>;
+	fifoth_val = <0x203f0040>;
+	bus_hz = <400000000>;
+	div = <0x3>;
+	index = <4>;
+	fifo-depth = <0x80>;
+	status = "okay";
+};
+
