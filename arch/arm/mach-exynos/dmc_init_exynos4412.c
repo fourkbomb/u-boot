@@ -11,12 +11,8 @@
 
 void mem_ctrl_init(int reset)
 {
-	struct exynos4x12_clock *clk =
-		(struct exynos4x12_clock *)samsung_get_base_clock();
 	struct exynos4_dmc *dmc = (struct exynos4_dmc *)samsung_get_base_dmc_ctrl();
 	struct exynos4_dmc *dmc1 = (struct exynos4_dmc *)(samsung_get_base_dmc_ctrl() + DMC_OFFSET);
-
-	writel(0x00117713, &clk->div_dmc0);
 
 	writel(0xe3855403, &dmc->phyzqcontrol);
 	writel(0x71101008, &dmc->phycontrol0);
