@@ -45,6 +45,7 @@ void system_clock_init(void)
 	writel(CLK_SRC_LEFTBUS_VAL, &clk->src_leftbus);
 	writel(CLK_SRC_RIGHTBUS_VAL, &clk->src_rightbus);
 	writel(CLK_SRC_PERIL0_VAL, &clk->src_peril0);
+	writel(CLK_SRC_LCD0_VAL, &clk->src_lcd);
 
 	sdelay(0x10000);
 
