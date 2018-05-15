@@ -265,11 +265,11 @@
 #if 0 //defined(CONFIG_CLK_BUS_DMC_100_200)
 #define DMC_RATIO		0x3
 #else
-#define DMC_RATIO		0x1
+#define DMC_RATIO		0x7
 #endif
 #define DPHY_RATIO		0x1
 #define ACP_PCLK_RATIO		0x1
-#define ACP_RATIO		0x3
+#define ACP_RATIO		0x7
 
 #define CLK_DIV_DMC0_VAL	((CORE_TIMERS_RATIO << 28) \
 							| (COPY2_RATIO << 24) \
@@ -285,7 +285,7 @@
 #define DVSEM_RATIO		0x7
 #define C2C_ACLK_RATIO	0x1
 #define PWI_RATIO		0x7
-#define C2C_RATIO		0x1
+#define C2C_RATIO		0x7
 #define G2D_ACP_RATIO	0x3
 
 #define CLK_DIV_DMC1_VAL	((DPM_RATIO << 24) \
@@ -313,8 +313,8 @@
 
 /* CLK_SRC_TOP1	*/
 #define VPLLSRC_SEL	0x0	/* 0 = FINPLL, 1 = SCLKHDMI27M	*/
-#define MUX_ACLK_400_MCUISP_SUB_SEL 0x1 /*DIVOUT_ACLK_400_MCUISP */
-#define MUX_ACLK_200_SUB_SEL 0x1 /*DIVOUT_ACLK_200*/
+#define MUX_ACLK_400_MCUISP_SUB_SEL 0x0 /*FINPLL*/
+#define MUX_ACLK_200_SUB_SEL 0x0 /* FINPLL */
 #define MUX_ACLK_266_GPS_SUB_SEL 0x1 /*DIVOUT_ACLK_266_GPS*/
 #define MUX_MPLL_USER_T_SEL 0x1 /* SCLKMPLL */
 
@@ -327,9 +327,9 @@
 #define ACLK_400_MCUISP_RATIO	0x1
 #define ACLK_266_GPS_RATIO	0x2
 #define ONENAND_RATIO	0x1
-#define ACLK_133_RATIO	0x5
+#define ACLK_133_RATIO	0x7
 #define ACLK_160_RATIO	0x4
-#define ACLK_100_RATIO	0x7
+#define ACLK_100_RATIO	0xf
 #define ACLK_200_RATIO	0x4
 
 #define CLK_DIV_TOP_VAL	((ACLK_400_MCUISP_RATIO << 24) \
@@ -347,7 +347,7 @@
 
 /* CLK_DIV_LEFTBUS	*/
 #define GPL_RATIO	0x1
-#define GDL_RATIO	0x3
+#define GDL_RATIO	0x7
 #define CLK_DIV_LEFTBUS_VAL	((GPL_RATIO << 4) \
 								| (GDL_RATIO))
 
@@ -357,7 +357,7 @@
 
 /* CLK_DIV_RIGHTBUS	*/
 #define GPR_RATIO	0x1
-#define GDR_RATIO	0x3
+#define GDR_RATIO	0x7
 #define CLK_DIV_RIGHTBUS_VAL	((GPR_RATIO << 4) \
 								| (GDR_RATIO))
 
@@ -424,6 +424,17 @@
 #define UART_UBRDIV_VAL	0x2F     /* (SCLK_UART/(115200*16) -1) */
 #define UART_UDIVSLOT_VAL 0x3		/*((((SCLK_UART*10/(115200*16) -10))%10)*16/10)*/
 #endif
+
+/* CLK_SRC_LCD0 */
+#define MIPI0_SEL 0x1
+#define MDNIE_PWM0_SEL 0x1
+#define MDNIE0_SEL 0x6
+#define FIMD0_SEL 0x6
+
+#define CLK_SRC_LCD0_VAL	((MIPI0_SEL << 12) \
+							| (MDNIE_PWM0_SEL << 8) \
+							| (MDNIE0_SEL << 4) \
+							| (FIMD0_SEL))
 
 /* DMC PHYCONTROL0 */
 #define CTRL_FORCE	(0x7f << 24)
