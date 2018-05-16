@@ -7,7 +7,11 @@
 
 
 /* Cache disabled */
-#define CONFIG_SYS_L2CACHE_OFF
+/*#define CONFIG_SYS_L2CACHE_OFF*/
+#ifndef CONFIG_SYS_L2CACHE_OFF
+#define CONFIG_SYS_L2_PL310
+#define CONFIG_SYS_PL310_BASE	0x10502000
+#endif
 
 /* 1GB of DRAM */
 #define CONFIG_NR_DRAM_BANKS 4
@@ -50,10 +54,14 @@
 /* Boot off EMMC */
 #define CONFIG_SUPPORT_EMMC_BOOT
 
+#define CONFIG_IPADDR 192.168.4.1
+
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	"loadk=" \
 		"mmc dev 2 0; mmc read 0x50000000 0x14000 0x4000;" \
 		"load mmc 2:a 0x60000000 /exynos4412-midas.dtb\0" \
+	"nc=" \
+		"setenv stdout nc;setenv stdin nc\0" \
 	"sd=" \
 		"mmc rescan; mmc dev 1; mmc read 0x50000000 0x0 0x10000;" \
 		"bootm 0x50000000;\0" \
