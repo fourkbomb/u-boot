@@ -6,7 +6,7 @@
 / {
 	model = "Samsung GT-I9300 based on Exynos4412";
 
-	compatible = "samsung,i9300", "samsung,exynos4412", "samsung,exynos4";
+	compatible = "samsung,i9300", "samsung,midas", "samsung,exynos4412", "samsung,exynos4";
 
 	aliases {
 		i2c8 = &i2c_max77693;
