@@ -8,6 +8,7 @@
 #include <asm/gpio.h>
 #include <asm/arch/gpio.h>
 #include <extcon.h>
+#include <linux/libfdt.h>
 #include <power/max77686_pmic.h>
 #include <power/max77693_muic.h>
 #include <power/pmic.h>
@@ -132,6 +133,35 @@ int board_usb_init(int index, enum usb_init_type init)
 	pr_info("Board usb init! %d %d\n", index, init);
 	return dwc2_udc_probe(&exynos4_otg_data);
 }
+
+#ifdef CONFIG_OF_BOARD_SETUP
+int ft_board_setup(void *blob, bd_t *bd)
+{
+#if 0
+	int ret;
+	/* we don't want the OS to think we're running under secure firmware */
+	int offs = fdt_node_offset_by_compatible(blob, 0, "samsung,secure-firmware");
+	if (offs < 0) {
+		if (offs == -FDT_ERR_NOTFOUND) {
+			printf("%s: no secure firmware node!\n", __func__);
+			return 0;
+		}
+		printf("%s: failed to find secure firmware node: %d\n", __func__, offs);
+		return -EINVAL;
+	}
+
+	/* delete the node */
+	ret = fdt_setprop_string(blob, offs, "test", "blah");
+	if (ret < 0) {
+		printf("%s: failed to remove secure firmware node: %d\n", __func__, ret);
+		return -EINVAL;
+	}
+
+	printf("FDT set up for OS %p\n", blob);
+#endif
+	return 0;
+}
+#endif
 
 int exynos_init(void)
 {
