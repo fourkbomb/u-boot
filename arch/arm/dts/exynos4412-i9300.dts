@@ -406,7 +406,7 @@
 	samsung,removable = <0>;
 	fifoth_val = <0x203f0040>;
 	bus_hz = <400000000>;
-	div = <0x3>;
+	div = <0x0>;
 	index = <4>;
 	fifo-depth = <0x80>;
 	status = "okay";
