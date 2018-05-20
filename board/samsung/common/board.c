@@ -42,6 +42,11 @@ __weak int exynos_power_init(void)
 	return 0;
 }
 
+__weak int exynos_late_init(void)
+{
+	return 0;
+}
+
 #if defined CONFIG_EXYNOS_TMU
 /* Boot Time Thermal Analysis for SoC temperature threshold breach */
 static void boot_temp_check(void)
@@ -309,6 +314,7 @@ int board_late_init(void)
 {
 	stdio_print_current_devices();
 
+#ifdef CONFIG_CROS_EC
 	if (cros_ec_get_error()) {
 		/* Force console on */
 		gd->flags &= ~GD_FLG_SILENT;
@@ -319,7 +325,9 @@ int board_late_init(void)
 		panic("Cannot init cros-ec device");
 		return -1;
 	}
-	return 0;
+#endif
+
+	return exynos_late_init();;
 }
 #endif
 
