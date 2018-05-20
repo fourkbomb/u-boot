@@ -9,6 +9,7 @@
 #include <asm/arch/gpio.h>
 #include <extcon.h>
 #include <linux/libfdt.h>
+#include <mmc.h>
 #include <power/max77686_pmic.h>
 #include <power/max77693_muic.h>
 #include <power/pmic.h>
@@ -18,10 +19,51 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-int get_board_rev(void)
+static uint64_t board_serial = 0;
+static char board_rev = 0xff;
+static char board_serial_str[17];
+
+void board_load_info(void)
 {
-	// TODO: GPM1[5:2]
-	return 0;
+	struct mmc *emmc = find_mmc_device(2);
+	static const int rev_gpios[] = {
+		EXYNOS4X12_GPIO_M15,
+		EXYNOS4X12_GPIO_M14,
+		EXYNOS4X12_GPIO_M13,
+		EXYNOS4X12_GPIO_M12,
+	};
+
+	board_rev = 0;
+
+	for (int i = 0; i < ARRAY_SIZE(rev_gpios); i++) {
+		gpio_request(rev_gpios[i], "HW_REV[0..3]");
+		gpio_cfg_pin(rev_gpios[i], S5P_GPIO_INPUT);
+		gpio_set_pull(rev_gpios[i], S5P_GPIO_PULL_DOWN);
+
+		board_rev <<= 1;
+		board_rev |= gpio_get_value(rev_gpios[i]);
+	}
+
+	if (!emmc) {
+		pr_err("%s: couldn't get serial number - no eMMC device found!\n", __func__);
+		sprintf(board_serial_str, "%16x", 0);
+		return;
+	}
+
+	if (mmc_init(emmc)) {
+		pr_err("%s: eMMC init failed!\n", __func__);
+	} else {
+		board_serial = ((uint64_t)emmc->cid[2] << 32) | emmc->cid[3];
+	}
+	sprintf(board_serial_str, "%16llx", board_serial);
+	env_set("serial#", board_serial_str);
+}
+
+int get_board_rev(void) {
+	if (board_rev == 0xff)
+		board_load_info();
+
+	return board_rev;
 }
 
 static void board_gpio_init(void)
@@ -166,6 +208,13 @@ int ft_board_setup(void *blob, bd_t *bd)
 int exynos_init(void)
 {
 	board_gpio_init();
+
+	return 0;
+}
+
+int exynos_late_init(void)
+{
+	board_load_info();
 
 	return 0;
 }

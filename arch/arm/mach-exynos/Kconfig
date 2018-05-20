@@ -83,6 +83,7 @@ config TARGET_I9300
 	bool "Exynos4412 i9300 board"
 	select SUPPORT_SPL
 	select EXYNOS4412
+	select BOARD_LATE_INIT
 	imply OF_BOARD_SETUP
 
 endchoice
