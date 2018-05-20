@@ -338,10 +338,10 @@ void reset_misc(void)
 	}
 }
 
+#ifdef CONFIG_USB_DWC3
 int board_usb_cleanup(int index, enum usb_init_type init)
 {
-#ifdef CONFIG_USB_DWC3
 	dwc3_uboot_exit(index);
-#endif
 	return 0;
 }
+#endif
