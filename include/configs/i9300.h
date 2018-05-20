@@ -63,10 +63,10 @@
 	"nc=" \
 		"setenv stdout nc;setenv stdin nc\0" \
 	"sd=" \
-		"mmc rescan; mmc dev 1; mmc read 0x50000000 0x0 0x10000;" \
+		"mmc rescan; mmc dev 1; mmc read 0x50000000 0x800 0xa000;" \
 		"bootm 0x50000000;\0" \
 	"update=" \
-		"mmc dev 1; mmc read 0x50000000 0x1 0x1000;" \
+		"mmc dev 1; mmc read 0x50000000 0xa800 0x1000;" \
 		"mmc dev 2 1; mmc write 0x50000000 0x0 0x1000;\0"
 
 
