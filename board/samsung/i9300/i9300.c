@@ -176,6 +176,11 @@ int board_usb_init(int index, enum usb_init_type init)
 	return dwc2_udc_probe(&exynos4_otg_data);
 }
 
+int board_usb_cleanup(int index, enum usb_init_type init)
+{
+	return i9300_phy_control(0);
+}
+
 #ifdef CONFIG_OF_BOARD_SETUP
 int ft_board_setup(void *blob, bd_t *bd)
 {
