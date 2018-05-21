@@ -615,6 +615,13 @@ config CMD_ADC
 	  Shows ADC device info and permit printing one-shot analog converted
 	  data from a named Analog to Digital Converter.
 
+config CMD_BATTERY
+	bool "battery - information about batteries"
+	depends on DM_BATTERY
+	default y
+	help
+	  Provides access to information regarding batteries present on the system.
+
 config CMD_BIND
 	bool "bind/unbind - Bind or unbind a device to/from a driver"
 	depends on DM
