@@ -17,6 +17,7 @@ obj-$(CONFIG_CMD_ADC) += adc.o
 obj-$(CONFIG_CMD_ARMFLASH) += armflash.o
 obj-$(CONFIG_HAVE_BLOCK_DEVICE) += blk_common.o
 obj-$(CONFIG_CMD_SOURCE) += source.o
+obj-$(CONFIG_CMD_BATTERY) += battery.o
 obj-$(CONFIG_CMD_BCB) += bcb.o
 obj-$(CONFIG_CMD_BDI) += bdinfo.o
 obj-$(CONFIG_CMD_BEDBUG) += bedbug.o
