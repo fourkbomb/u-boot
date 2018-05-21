@@ -1,0 +1,6 @@
+config DM_BATTERY
+	bool "Enable Driver Model for BATTERY drivers (UCLASS_BATTERY)"
+	depends on DM
+	---help---
+	This config enables driver model battery support.
+
