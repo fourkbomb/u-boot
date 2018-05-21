@@ -601,6 +601,13 @@ config CMD_ARMFLASH
 	help
 	  ARM Ltd reference designs flash partition access
 
+config CMD_BATTERY
+	bool "battery - information about batteries"
+	depends on DM_BATTERY
+	default y
+	help
+	  Provides access to information regarding batteries present on the system.
+
 config CMD_CLK
 	bool "clk - Show clock frequencies"
 	help
