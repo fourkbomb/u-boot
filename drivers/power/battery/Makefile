@@ -5,3 +5,5 @@
 
 obj-$(CONFIG_POWER_BATTERY_TRATS) += bat_trats.o
 obj-$(CONFIG_POWER_BATTERY_TRATS2) += bat_trats2.o
+
+obj-$(CONFIG_DM_BATTERY) += battery-uclass.o
