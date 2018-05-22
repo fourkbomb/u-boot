@@ -5,6 +5,7 @@
 
 obj-$(CONFIG_DM_PMIC) += pmic-uclass.o
 obj-$(CONFIG_DM_PMIC_FAN53555) += fan53555.o
+obj-$(CONFIG_DM_PMIC_MAX17047) += max17047.o
 obj-$(CONFIG_DM_PMIC_MAX77686) += max77686.o
 obj-$(CONFIG_DM_PMIC_MAX77693) += max77693.o
 obj-$(CONFIG_DM_PMIC_MAX8998) += max8998.o
