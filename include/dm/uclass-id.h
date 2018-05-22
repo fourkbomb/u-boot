@@ -31,6 +31,7 @@ enum uclass_id {
 	UCLASS_AHCI,		/* SATA disk controller */
 	UCLASS_BATTERY,		/* Battery */
 	UCLASS_BLK,		/* Block device */
+	UCLASS_CHARGER,		/* Charger */
 	UCLASS_CLK,		/* Clock source, e.g. used by peripherals */
 	UCLASS_CPU,		/* CPU, typically part of an SoC */
 	UCLASS_CROS_EC,		/* Chrome OS EC */
