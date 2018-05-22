@@ -2,6 +2,8 @@ menu "Power"
 
 source "drivers/power/battery/Kconfig"
 
+source "drivers/power/charger/Kconfig"
+
 source "drivers/power/domain/Kconfig"
 
 source "drivers/power/pmic/Kconfig"
