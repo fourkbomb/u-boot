@@ -20,9 +20,10 @@ DECLARE_GLOBAL_DATA_PTR;
 #define PMIC_TYPE_HAPTIC 2
 
 static const struct pmic_child_info pmic_children_info[] = {
-	{ .prefix = "ESAFEOUT", .driver = MAX77693_SAFEOUT_DRIVER },
-	{ .prefix = "CHARGER", .driver = MAX77693_CHARGER_DRIVER },
+	{ .prefix = "ESAFEOUT", .driver = MAX77693_REGULATOR_SAFEOUT_DRIVER },
+	{ .prefix = "CHARGER", .driver = MAX77693_REGULATOR_CHARGER_DRIVER },
 	{ .prefix = "muic", .driver = MAX77693_MUIC_DRIVER },
+	{ .prefix = "charger", .driver = MAX77693_CHARGER_DRIVER },
 };
 
 static int max77693_reg_count(struct udevice *dev)
@@ -66,25 +67,28 @@ static int max77693_read(struct udevice *dev, uint reg, uint8_t *buff, int len)
 
 static int max77693_bind(struct udevice *dev)
 {
-	ofnode children_node;
+	ofnode children_node = dev_ofnode(dev);
 	int children;
 	ulong type = dev_get_driver_data(dev);
 
-	if (type == PMIC_TYPE_MUIC) {
-		children_node = dev_ofnode(dev);
-	} else {
+	children = pmic_bind_children(dev, children_node, pmic_children_info);
+	if (!children)
+		debug("%s: %s: found no children!", dev->name,
+				__func__);
+
+	if (type == PMIC_TYPE_CHARGER) {
 		children_node = dev_read_subnode(dev, "regulators");
 		if (!ofnode_valid(children_node)) {
 			debug("%s: %s: found no regulators!", dev->name,
 					__func__);
 			return -ENXIO;
 		}
-	}
 
-	children = pmic_bind_children(dev, children_node, pmic_children_info);
-	if (!children)
-		debug("%s: %s: found no children!", dev->name,
-				__func__);
+		children = pmic_bind_children(dev, children_node, pmic_children_info);
+		if (!children)
+			debug("%s: %s: found no regulator children!", dev->name,
+					__func__);
+	}
 
 	return 0;
 }
