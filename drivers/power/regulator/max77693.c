@@ -230,7 +230,7 @@ static const struct dm_regulator_ops max77693_charger_ops = {
 };
 
 U_BOOT_DRIVER(max77693_reg_charger) = {
-	.name = MAX77693_CHARGER_DRIVER,
+	.name = MAX77693_REGULATOR_CHARGER_DRIVER,
 	.id = UCLASS_REGULATOR,
 	.ops = &max77693_charger_ops,
 };
@@ -243,7 +243,7 @@ static const struct dm_regulator_ops max77693_safeout_ops = {
 };
 
 U_BOOT_DRIVER(max77693_reg_safeout) = {
-	.name = MAX77693_SAFEOUT_DRIVER,
+	.name = MAX77693_REGULATOR_SAFEOUT_DRIVER,
 	.id = UCLASS_REGULATOR,
 	.ops = &max77693_safeout_ops,
 };
