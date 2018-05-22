@@ -77,6 +77,10 @@
 			interrupts = <5 2>;
 			reg = <0x66>;
 
+			charger {
+				charger-supply = <&charger_reg>;
+			};
+
 			regulators {
 				esafeout1_reg: ESAFEOUT1 {
 					regulator-name = "ESAFEOUT1";
