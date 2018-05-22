@@ -1,0 +1,5 @@
+config DM_CHARGER
+	bool "Enable Driver Model for charger drivers (UCLASS_CHARGER)"
+	depends on DM
+	---help---
+	This config enables driver model charger support.

@@ -696,6 +696,7 @@ libs-y += drivers/mtd/spi/
 libs-y += drivers/net/
 libs-y += drivers/net/phy/
 libs-y += drivers/power/ \
+	drivers/power/charger/ \
 	drivers/power/domain/ \
 	drivers/power/fuel_gauge/ \
 	drivers/power/mfd/ \
