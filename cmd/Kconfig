@@ -614,6 +614,13 @@ config CMD_BATTERY
 	help
 	  Provides access to information regarding batteries present on the system.
 
+config CMD_CHARGER
+	bool "charger - control chargers"
+	depends on DM_CHARGER
+	default y
+	help
+		Provides access to information regarding chargers and control of chargers.
+
 config CMD_CLK
 	bool "clk - Show clock frequencies"
 	help
