@@ -25,7 +25,7 @@ static char board_serial_str[17];
 
 void board_load_info(void)
 {
-	struct mmc *emmc = find_mmc_device(2);
+	struct mmc *emmc = find_mmc_device(0);
 	static const int rev_gpios[] = {
 		EXYNOS4X12_GPIO_M15,
 		EXYNOS4X12_GPIO_M14,
