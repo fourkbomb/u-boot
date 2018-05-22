@@ -69,6 +69,13 @@ config DM_PMIC_PFUZE100
 	This config enables implementation of driver-model pmic uclass features
 	for PMIC PFUZE100. The driver implements read/write operations.
 
+config DM_PMIC_MAX17047
+	bool "Enable Driver Model for PMIC MAX17047"
+	depends on DM_PMIC
+	---help---
+	This config enables implementation of driver-model pmic uclass features
+	for MAX17047. This driver implements read/write operations
+
 config DM_PMIC_MAX77686
 	bool "Enable Driver Model for PMIC MAX77686"
 	depends on DM_PMIC
