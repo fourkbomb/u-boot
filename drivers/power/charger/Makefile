@@ -5,4 +5,4 @@
 #
 
 obj-$(CONFIG_DM_CHARGER) += charger-uclass.o
-
+obj-$(CONFIG_DM_CHARGER_MAX77693) += max77693.o
