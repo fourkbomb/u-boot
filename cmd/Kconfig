@@ -637,6 +637,13 @@ config CMD_BIND
 	  drivers. For example, this can be used to bind a UDC to the usb ether
 	  gadget driver from the command line.
 
+config CMD_CHARGER
+	bool "charger - control chargers"
+	depends on DM_CHARGER
+	default y
+	help
+		Provides access to information regarding chargers and control of chargers.
+
 config CMD_CLK
 	bool "clk - Show clock frequencies"
 	help
