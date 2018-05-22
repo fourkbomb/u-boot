@@ -211,6 +211,11 @@ void copy_uboot_to_ram(void)
 		bootmode = BOOT_MODE_USB;
 #endif
 
+	/* Sometimes we might want to test a u-boot image installed to the SD card. Obviously, this won't test the FWBL1/SPL... */
+	struct exynos4412_power *power = (struct exynos4412_power *)samsung_get_base_power();
+	if (readl(&power->inform0) == 0xadeadbed)
+		bootmode = BOOT_MODE_SD;
+
 	if (bootmode == BOOT_MODE_OM)
 		bootmode = get_boot_mode();
 
