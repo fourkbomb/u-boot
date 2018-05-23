@@ -107,18 +107,22 @@ static int i9300_phy_control(int on)
 		return -1;
 	}
 
-	pr_info("Waiting 10 seconds for USB to be inserted...\n");
-	int i = 0;
-	do {
-		extcon_get_cable_id(extcon, &type);
-		if (type & EXTCON_TYPE_USB)
-			break;
-		mdelay(1000);
-	} while (i++ < 10);
+	if (on) {
+		pr_info("Waiting 10 seconds for USB to be inserted...\n");
+		int i = 0;
+		do {
+			extcon_get_cable_id(extcon, &type);
+			if (type & EXTCON_TYPE_USB)
+				break;
+			if (ctrlc())
+				break;
+			mdelay(1000);
+		} while (i++ < 10);
 
-	if (!(type & EXTCON_TYPE_USB)) {
-		pr_info("No USB cable detected, aborting!\n");
-		return -1;
+		if (!(type & EXTCON_TYPE_USB)) {
+			pr_info("No USB cable detected, aborting!\n");
+			return -1;
+		}
 	}
 
 	if (on) {
