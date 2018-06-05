@@ -1,0 +1,8 @@
+config DM_EXYNOS_MIPI_DSI
+	bool "Enable driver model support for Exynos4 MIPI DSI"
+	depends on DISPLAY && DM_VIDEO && ARCH_EXYNOS4
+	default y
+	help
+		This enables driver model support for the MIPI DSI master
+		found in Exynos4 SoCs.
+

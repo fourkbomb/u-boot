@@ -449,6 +449,8 @@ config VIDEO_IVYBRIDGE_IGD
 	  a special tool which configures the VGA ROM, but the graphics
 	  resolution can be selected in U-Boot.
 
+source "drivers/video/exynos/Kconfig"
+
 config VIDEO_FSL_DCU_FB
 	bool "Enable Freescale Display Control Unit"
 	depends on VIDEO
