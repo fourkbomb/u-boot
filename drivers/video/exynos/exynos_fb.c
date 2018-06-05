@@ -672,8 +672,10 @@ static int exynos_fb_probe(struct udevice *dev)
 	}
 
 	ret = uclass_get_device(UCLASS_VIDEO_BRIDGE, 0, &bridge);
+#ifdef CONFIG_VIDEO_BRIDGE
 	if (!ret)
 		ret = video_bridge_set_backlight(bridge, 80);
+#endif
 	if (ret) {
 		debug("%s: No video bridge, or no backlight on bridge\n",
 		      __func__);
