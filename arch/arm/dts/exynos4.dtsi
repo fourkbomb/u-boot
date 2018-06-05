@@ -8,6 +8,7 @@
  */
 
 #include "skeleton.dtsi"
+#include <dt-bindings/interrupt-controller/irq.h>
 
 / {
 	aliases {
@@ -136,6 +137,16 @@
 		reg = <0x138d0000 0x100>;
 		interrupt-parent = <&gic>;
 		interrupts = <7 63 0>;
+	};
+
+	mipi_dsi0: dsi@11c80000 {
+		compatible = "samsung,exynos4210-mipi-dsi";
+		reg = <0x11c80000 0x10000>;
+		interrupt-parent = <&gic>;
+		interrupts = <0 79 IRQ_TYPE_LEVEL_HIGH>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		status = "disabled";
 	};
 
 	sdhci0: sdhci@12510000 {
