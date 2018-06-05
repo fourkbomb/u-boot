@@ -98,6 +98,45 @@
 			};
 		};
 	};
+
+	fimd@11c00000 {
+		compatible = "samsung,exynos-fimd";
+		reg = <0x11c00000 0xa4>;
+		u-boot,dm-pre-reloc;
+		samsung,vl-freq = <60>;
+		samsung,vl-col = <720>;
+		samsung,vl-row = <1280>;
+		samsung,vl-width = <720>;
+		samsung,vl-height = <1280>;
+
+		samsung,vl-clkp = <0>;
+		samsung,vl-oep = <0>;
+		samsung,vl-hsp = <1>;
+		samsung,vl-vsp = <1>;
+		samsung,vl-dp = <1>;
+		samsung,vl-bpix = <4>;
+
+		samsung,vl-hspw = <5>;
+		samsung,vl-hbpd = <10>;
+		samsung,vl-hfpd = <10>;
+		samsung,vl-vspw = <2>;
+		samsung,vl-vbpd = <1>;
+		samsung,vl-vfpd = <13>;
+		samsung,vl-cmd-allow-len = <0xf>;
+
+		samsung,winid = <0>;
+		samsung,power-on-delay = <30>;
+		samsung,interface-mode = <1>;
+		samsung,mipi-enabled = <1>;
+		samsung,dp-enabled;
+		samsung,dual-lcd-enabled;
+
+		/*samsung,logo-on = <1>;*/
+		samsung,resolution = <0>;
+		samsung,rgb-mode = <0>;
+	};
+
+
 };
 
 &i2c_7 {
@@ -412,6 +451,42 @@
 				regulator-mem-off;
 			};
 		};
+	};
+};
+
+&mipi_dsi0 {
+	status = "okay";
+	samsung,data-lanes = <4>;
+	samsung,stop-holding-cnt = <0x7ff>;
+	samsung,bta-timeout = <0xff>;
+	samsung,rx-timeout = <0xffff>;
+
+	samsung,virtual-channel = <0>;
+	samsung,burst-mode = <1>;
+	samsung,pixel-format = <7>;
+	samsung,esc-clk = <20000000>;
+
+	samsung,pll-pre-divider = <3>;
+	samsung,pll-main-divider = <120>;
+	samsung,pll-scaler = <1>;
+
+	display-timings {
+		timing0 {
+			clock-frequency = <57153600>;
+			hactive = <720>;
+			vactive = <1280>;
+			hfront-porch = <5>;
+			hback-porch = <5>;
+			hsync-len = <5>;
+			vfront-porch = <13>;
+			vback-porch = <1>;
+			vsync-len = <2>;
+		};
+	};
+
+	panel@0 {
+		reg = <0>;
+		compatible = "samsung,s6e8ax0";
 	};
 };
 
