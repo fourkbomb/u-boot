@@ -9,7 +9,7 @@
 #include <asm/io.h>
 #include <asm/arch/power.h>
 
-static void exynos4_mipi_phy_control(unsigned int dev_index,
+static void exynos4210_mipi_phy_control(unsigned int dev_index,
 					unsigned int enable)
 {
 	struct exynos4_power *pmu =
@@ -31,10 +31,33 @@ static void exynos4_mipi_phy_control(unsigned int dev_index,
 	writel(cfg, addr);
 }
 
+static void exynos4412_mipi_phy_control(unsigned int dev_index,
+					unsigned int enable)
+{
+	struct exynos4412_power *pmu =
+		(struct exynos4412_power *)samsung_get_base_power();
+	unsigned int addr, cfg = 0;
+
+	if (dev_index == 0)
+		addr = (unsigned int)&pmu->mipi_phy0_control;
+	else
+		addr = (unsigned int)&pmu->mipi_phy1_control;
+
+	cfg = readl(addr);
+	if (enable)
+		cfg |= (EXYNOS_MIPI_PHY_MRESETN | EXYNOS_MIPI_PHY_ENABLE);
+	else
+		cfg &= (EXYNOS_MIPI_PHY_MRESETN | EXYNOS_MIPI_PHY_ENABLE);
+
+	writel(cfg, addr);
+}
+
 void set_mipi_phy_ctrl(unsigned int dev_index, unsigned int enable)
 {
 	if (proid_is_exynos4210())
-		exynos4_mipi_phy_control(dev_index, enable);
+		exynos4210_mipi_phy_control(dev_index, enable);
+	else if (prodid_is_exynos4412())
+		exynos4412_mipi_phy_control(dev_index, enable);
 }
 
 void exynos5_set_usbhost_phy_ctrl(unsigned int enable)
