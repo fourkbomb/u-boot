@@ -47,13 +47,17 @@
 #define CONFIG_BL1_SIZE (8 << 10) /* 8K for BL1 */
 #define CONFIG_SPL_SIZE (16 << 10) /* 14K for SPL (BL2). 4 byte checksum. Padded to 16K */
 #define CONFIG_BL2_SIZE (1024 << 10) /* 1024K u-boot */
-#define CONFIG_SEC_FW_SIZE (160 << 10) /* 160K TZSW */
 #define CONFIG_ENV_SIZE (16 << 10) /* 16K for env */
 
 #define CONFIG_BL2_OFFSET (CONFIG_RES_BLOCK_SIZE + CONFIG_BL1_SIZE + CONFIG_SPL_SIZE)
 
 #define BL2_START_OFFSET (CONFIG_BL2_OFFSET/512)
 #define BL2_SIZE_BLOC_COUNT (CONFIG_BL2_SIZE/512)
+
+/* env on eMMC */
+#define CONFIG_SYS_MMC_ENV_DEV 0
+#define CONFIG_SYS_MMC_ENV_PART 1
+#define CONFIG_ENV_OFFSET (CONFIG_BL1_SIZE + CONFIG_SPL_SIZE + CONFIG_BL2_SIZE)
 
 
 /* Boot off EMMC */
