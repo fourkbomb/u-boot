@@ -1,0 +1,54 @@
+{
+    "settings": {
+        "disk_size": "15753805312"
+    },
+    "partitions": [
+        {
+            "label": "bootinfo",
+            "size": "12561920",
+            "position": -4
+        },
+        {
+            "label": "efs",
+            "size": "20 MiB",
+            "position": -3
+        },
+        {
+            "label": "boot",
+            "size": "24 MiB",
+            "type_guid": "brillo_boot",
+            "position": -2
+        },
+        {
+            "label": "radio",
+            "size": "32 MiB",
+            "position": -1
+        },
+        {
+            "label": "recovery",
+            "size": "24 MiB"
+        },
+        {
+            "label": "misc",
+            "size": "1 MiB",
+            "type_guid": "brillo_misc"
+        },
+        {
+            "label": "system",
+            "size": "1 GiB",
+            "type_guid": "brillo_system"
+        },
+        {
+            "label": "vendor",
+            "size": "1 GiB"
+        },
+        {
+            "label": "userdata",
+            "size": "1 GiB",
+            "grow": true,
+            "type_guid": "brillo_userdata"
+        }
+    ]
+}
+
+
