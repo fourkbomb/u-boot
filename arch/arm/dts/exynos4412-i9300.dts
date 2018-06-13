@@ -131,11 +131,27 @@
 		samsung,dp-enabled;
 		samsung,dual-lcd-enabled;
 
-		/*samsung,logo-on = <1>;*/
+		samsung,logo-on = <1>;
 		samsung,resolution = <0>;
 		samsung,rgb-mode = <0>;
 	};
 
+	lcd_vdd3_reg: lcd-fixed-reg {
+		compatible = "regulator-fixed";
+		regulator-name = "LCD_VDD_3.3V";
+		gpio = <&gpc0 1 GPIO_ACTIVE_HIGH>;
+		regulator-min-microvolt = <2200000>;
+		regulator-max-microvolt = <2200000>;
+		enable-active-high;
+	};
+
+	panel {
+		compatible = "samsung,s6e8ax0";
+		vci-supply = <&ldo25_reg>;
+		vdd3-supply = <&lcd_vdd3_reg>;
+		reset-gpios = <&gpf2 1 GPIO_ACTIVE_HIGH>;
+		dsi-master = <&mipi_dsi0>;
+	};
 
 };
 
@@ -484,10 +500,6 @@
 		};
 	};
 
-	panel@0 {
-		reg = <0>;
-		compatible = "samsung,s6e8ax0";
-	};
 };
 
 &sdhci2 {

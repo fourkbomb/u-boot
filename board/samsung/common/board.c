@@ -341,7 +341,7 @@ int misc_init_r(void)
 	keys_init();
 	check_boot_mode();
 #endif
-#ifdef CONFIG_CMD_BMP
+#if 0
 	if (panel_info.logo_on)
 		draw_logo();
 #endif

@@ -182,7 +182,8 @@ int lists_bind_fdt(struct udevice *parent, ofnode node, struct udevice **devp)
 		if (ret) {
 			dm_warn("Error binding driver '%s': %d\n", entry->name,
 				ret);
-			return ret;
+			ret = -ENODEV;
+			continue;
 		} else {
 			found = true;
 			if (devp)

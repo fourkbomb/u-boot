@@ -42,7 +42,12 @@ static void exynos4_set_system_display(void)
 	 * 1: FIMD Bypass
 	 */
 	cfg = readl(&sysreg->display_ctrl);
-	cfg |= (1 << 1);
+	//cfg |= (1 << 1);
+	cfg &= ~(1 << 13);
+	cfg &= ~(1 << 12);
+	cfg &= ~(3 << 10);
+	cfg &= ~(1 << 1);
+	cfg |= 1 << 0;
 	writel(cfg, &sysreg->display_ctrl);
 }
 

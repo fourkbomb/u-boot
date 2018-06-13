@@ -76,7 +76,8 @@
 		"mmc dev 0 1; mmc write 0x50000000 0x0 0x1000;\0" \
 	"sdupdate=" /* install updated u-boot from bootable SD card */ \
 		"mmc dev 1; mmc read 0x50000000 0x1 0x1000;" \
-		"mmc dev 0 1; mmc write 0x50000000 0x0 0x1000;\0"
+		"mmc dev 0 1; mmc write 0x50000000 0x0 0x1000;\0" \
+	"stdout=serial@13820000,vidconsole\0"
 
 #include <linux/sizes.h>
 

@@ -33,7 +33,7 @@ int initcall_run_list(const init_fnc_t init_sequence[])
 			printf("initcall sequence %p failed at call %p (err=%d)\n",
 			       init_sequence,
 			       (char *)*init_fnc_ptr - reloc_ofs, ret);
-			return -1;
+			return 0;
 		}
 	}
 	return 0;

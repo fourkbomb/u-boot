@@ -43,6 +43,9 @@ int display_read_timing(struct udevice *dev, struct display_timing *timing);
 int display_enable(struct udevice *dev, int panel_bpp,
 		   const struct display_timing *timing);
 
+int display_write(struct udevice *dev, int type,
+			unsigned char *data, size_t size);
+
 /**
  * display_in_use() - Check if a display is in use by any device
  *
@@ -81,6 +84,17 @@ struct dm_display_ops {
 	 */
 	int (*enable)(struct udevice *dev, int panel_bpp,
 		      const struct display_timing *timing);
+
+	/**
+	 * write() - Write data to the display.
+	 *
+	 * @dev:	Device to write to
+	 * @type:	transfer type - depends on the bus. Might be a DSI type.
+	 * @data:	data to send
+	 * @size:	amount of data, in bytes.
+	 */
+	int (*write)(struct udevice *dev, int type,
+			unsigned char *data, size_t size);
 };
 
 #define display_get_ops(dev)	((struct dm_display_ops *)(dev)->driver->ops)

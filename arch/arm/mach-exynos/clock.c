@@ -947,7 +947,7 @@ static unsigned long exynos4_get_lcd_clk(void)
 	ratio = ratio & 0xf;
 
 	pclk = sclk / (ratio + 1);
-
+	printf("LCD pclk = %lu, sclk=%u => %lu, div = %u\n", pclk, sel, sclk, ratio);
 	return pclk;
 }
 
@@ -1720,7 +1720,8 @@ unsigned long get_lcd_clk(void)
 void set_lcd_clk(void)
 {
 	if (cpu_is_exynos4()) {
-		exynos4_set_lcd_clk();
+		if (proid_is_exynos4210())
+			exynos4_set_lcd_clk();
 	} else if (cpu_is_exynos5()) {
 		if (proid_is_exynos5250())
 			exynos5_set_lcd_clk();
@@ -1733,7 +1734,7 @@ void set_lcd_clk(void)
 
 void set_mipi_clk(void)
 {
-	if (cpu_is_exynos4())
+	if (proid_is_exynos4210())
 		exynos4_set_mipi_clk();
 }
 

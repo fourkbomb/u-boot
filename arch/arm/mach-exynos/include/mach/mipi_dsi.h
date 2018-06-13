@@ -22,10 +22,10 @@
 
 /* CLKCTRL */
 #define DSI_CLKCTRL (0x8)
-#define DSI_CLKCTRL_ESCCLK_EN (1 << 18)
-#define DSI_CLKCTRL_LANE_ESCCLK(x) ((x) << 19)
-#define DSI_CLKCTRL_BYTECLK_EN (1 << 24)
 #define DSI_CLKCTRL_HSCLK_EN (1 << 31)
+#define DSI_CLKCTRL_ESCCLK_EN (1 << 28)
+#define DSI_CLKCTRL_BYTECLK_EN (1 << 24)
+#define DSI_CLKCTRL_LANE_ESCCLK(x) ((x) << 19)
 #define DSI_CLKCTRL_ESC_PRESCALER_MASK (0xffff)
 
 /* TIMEOUT */
@@ -85,7 +85,13 @@
 #define DSI_INTSRC_PLL_STABLE (1 << 31)
 
 #define DSI_INTMSK (0x30)
+
+/* PKTHDR */
 #define DSI_PKTHDR (0x34)
+#define DSI_PKTHDR_DAT1(x) ((x) << 16)
+#define DSI_PKTHDR_DAT0(x) ((x) << 8)
+#define DSI_PKTHDR_DI(x) (((x) & 0x3f) << 0)
+
 #define DSI_PAYLOAD (0x38)
 #define DSI_RXFIFO (0x3c)
 #define DSI_FIFOTHLD (0x40)

@@ -57,6 +57,17 @@ int display_read_timing(struct udevice *dev, struct display_timing *timing)
 	return edid_get_timing(buf, ret, timing, &panel_bits_per_colour);
 }
 
+int display_write(struct udevice *dev, int type,
+			unsigned char *data, size_t size)
+{
+	struct dm_display_ops *ops = display_get_ops(dev);
+
+	if (ops && ops->write)
+		return ops->write(dev, type, data, size);
+
+	return -ENOSYS;
+}
+
 bool display_in_use(struct udevice *dev)
 {
 	struct display_plat *disp_uc_plat = dev_get_uclass_platdata(dev);

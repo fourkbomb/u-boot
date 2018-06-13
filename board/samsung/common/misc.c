@@ -326,7 +326,7 @@ static int mode_leave_menu(int mode)
 #endif
 }
 
-#ifdef CONFIG_LCD
+#if 0
 static void display_download_menu(int mode)
 {
 	char *selection[BOOT_MODE_EXIT + 1];
@@ -449,7 +449,7 @@ void keys_init(void)
 }
 #endif /* CONFIG_LCD_MENU */
 
-#ifdef CONFIG_CMD_BMP
+#if 0
 void draw_logo(void)
 {
 	int x, y;

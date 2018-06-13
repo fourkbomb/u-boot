@@ -224,6 +224,9 @@ static void exynos_fimd_set_clock(struct exynos_fb_priv *priv)
 				 priv->vl_hbpd + priv->vl_col) *
 				(priv->vl_vspw + priv->vl_vfpd +
 				 priv->vl_vbpd + priv->vl_row);
+		printf("%u %u %u %u %u %u %u %u %u = %lu\n", priv->vl_freq,
+				priv->vl_hspw, priv->vl_hfpd, priv->vl_hbpd, priv->vl_col,
+				priv->vl_vspw, priv->vl_vfpd, priv->vl_vbpd, priv->vl_row, pixel_clock);
 	}
 
 	cfg = readl(&reg->vidcon0);
@@ -239,6 +242,7 @@ static void exynos_fimd_set_clock(struct exynos_fb_priv *priv)
 	remainder = do_div(src_clock, pixel_clock);
 	div = src_clock;
 
+	printf("src_clock: %lu, pixel_clock: %lu, div = %lu", src_clock, pixel_clock, div);
 	remainder *= 10;
 	remainder_div = remainder / pixel_clock;
 

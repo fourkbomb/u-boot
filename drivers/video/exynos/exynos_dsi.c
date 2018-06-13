@@ -14,6 +14,7 @@
 #include <dm.h>
 #include <fdtdec.h>
 #include <panel.h>
+#include <mipi_dsi.h>
 #include <regmap.h>
 #include <asm/arch/mipi_dsi.h>
 #include "exynos_dsi.h"
@@ -84,7 +85,7 @@ static void exynos_mipi_set_afc(struct udevice *dev, int en, int code)
 	reg_write(reg, DSI_PHYACCHR);
 }
 
-static unsigned long exynos_mipi_set_pll(struct udevice *dev)
+static long exynos_mipi_set_pll(struct udevice *dev)
 {
 	struct exynos_mipi_priv *priv = dev_get_priv(dev);
 	unsigned long dfin_pll, fout;
@@ -113,7 +114,7 @@ static unsigned long exynos_mipi_set_pll(struct udevice *dev)
 		else
 			afc_code = 4;
 	}
-
+	printf("fin_pll: %lu. afc_en? %d, afc_code %d\n", dfin_pll, afc_en, afc_code);
 	exynos_mipi_set_afc(dev, afc_en, afc_code);
 
 	fout = (dfin_pll * priv->m) / (1 << priv->s);
@@ -121,6 +122,7 @@ static unsigned long exynos_mipi_set_pll(struct udevice *dev)
 	for (i = 0; i < ARRAY_SIZE(dpll_table); i++) {
 		if (fout < dpll_table[i] * MHZ) {
 			freq_band = i;
+			printf("freq_band=%d\n", i);
 			break;
 		}
 	}
@@ -146,6 +148,7 @@ static unsigned long exynos_mipi_set_pll(struct udevice *dev)
 		timeout--;
 	}
 
+	printf("PLL not stable?\n");
 	return 0;
 }
 
@@ -154,7 +157,7 @@ int exynos_mipi_set_clock(struct udevice *dev)
 	struct exynos_mipi_priv *priv = dev_get_priv(dev);
 	u32 reg;
 	int esc_div;
-	unsigned long hs_clk, byte_clk, esc_clk;
+	u32 hs_clk, byte_clk, esc_clk;
 
 	hs_clk = exynos_mipi_set_pll(dev);
 	if (!hs_clk)
@@ -162,7 +165,7 @@ int exynos_mipi_set_clock(struct udevice *dev)
 	byte_clk = hs_clk / 8;
 	esc_div = byte_clk / priv->esc_clk;
 
-	if ((byte_clk / esc_div) >= (20 * MHZ) ||
+	if ((byte_clk / esc_div) > (20 * MHZ) ||
 			(byte_clk / esc_div) > priv->esc_clk)
 		esc_div++;
 
@@ -175,7 +178,8 @@ int exynos_mipi_set_clock(struct udevice *dev)
 
 	reg_write(reg, DSI_CLKCTRL);
 
-	printf("%s: byte_clk=%lu MHz, esc_clk=%luMHz\n", __func__, byte_clk, esc_clk);
+	printf("%s: byte_clk=%u MHz, esc_clk=%uMHz, div=%d, goal=%uMHz\n", __func__, byte_clk, esc_clk, esc_div,
+			priv->esc_clk);
 	return 0;
 }
 
@@ -217,7 +221,8 @@ int exynos_mipi_prepare(struct udevice *dev)
 			| DSI_CONFIG_NUM_LANES(3));
 
 	reg |= DSI_CONFIG_HFP_MODE(priv->hfp) | DSI_CONFIG_NUM_LANES(priv->num_lanes - 1)
-		| DSI_CONFIG_LANE_ENABLE(priv->lane_mask) | DSI_CONFIG_CLOCK_LANE;
+		| DSI_CONFIG_LANE_ENABLE(priv->lane_mask) | DSI_CONFIG_CLOCK_LANE
+		| DSI_CONFIG_AUTO_MODE(1);
 	reg_write(reg, DSI_CONFIG);
 
 	printf("Set mipi clock\n");
@@ -240,10 +245,11 @@ int exynos_mipi_prepare(struct udevice *dev)
 		printf(".");
 	} while (timeout >= 0);
 
-	printf("\nSTOP STATE\n");
+	printf("\nSTOP STATE: %#x\n", priv->stop_holding_cnt);
 	reg = reg_read(DSI_ESCMODE);
 	reg &= ~(DSI_ESCMODE_STOP_STATE_CNT(0x7ff));
 	reg |= DSI_ESCMODE_STOP_STATE_CNT(priv->stop_holding_cnt);
+	printf("reg: %#x\n", reg);
 	reg_write(reg, DSI_ESCMODE);
 
 	reg = reg_read(DSI_TIMEOUT);
@@ -316,4 +322,76 @@ void exynos_mipi_set_display_mode(struct udevice *dev,
 		DSI_CONFIG_MAINVC(priv->virtual_channel) |
 		DSI_CONFIG_MAINPIX(priv->pixel_format);
 	reg_write(reg, DSI_CONFIG);
+}
+
+static void exynos_mipi_dsi_write_header(struct udevice *dev, unsigned int type,
+		unsigned char d0, unsigned char d1)
+{
+	struct exynos_mipi_priv *priv = dev_get_priv(dev);
+	unsigned int header = DSI_PKTHDR_DAT1(d1) | DSI_PKTHDR_DAT0(d0) | DSI_PKTHDR_DI(type);
+	printf("Write header: type=%d, d0=%#x, d1=%#x, header=%#x\n", type, d0, d1, header);
+	reg_write(header, DSI_PKTHDR);
+}
+
+static void exynos_mipi_dsi_long_write(struct udevice *dev, unsigned char *data,
+		size_t size)
+{
+	struct exynos_mipi_priv *priv = dev_get_priv(dev);
+	unsigned int payload;
+	int extra = size % 4;
+	int aligned = size - extra;
+
+	printf("Writing %d bytes (%d + %d)\n", size, aligned, extra);
+	/* write 4 bytes at a time */
+	for (int i = 0; i < aligned; i += 4) {
+		payload = data[i] |
+			(data[i + 1] << 8) |
+			(data[i + 2] << 16) |
+			(data[i + 3] << 24);
+
+		printf("%#x ", payload);
+		reg_write(payload, DSI_PAYLOAD);
+	}
+	printf("\n");
+
+	if (extra) {
+		/* Write any remaining data */
+		payload = data[aligned];
+		if (extra >= 2)
+			payload |= data[aligned + 1] << 8;
+		if (extra >= 3)
+			payload |= data[aligned + 2] << 16;
+
+		printf("Extra data: %#x\n", payload);
+		reg_write(payload, DSI_PAYLOAD);
+	}
+}
+
+int exynos_mipi_dsi_write(struct udevice *dev, enum dsi_cmd_type type,
+		unsigned char *data, size_t size)
+{
+	struct exynos_mipi_priv *priv = dev_get_priv(dev);
+	unsigned long delay = 10 * MHZ / priv->esc_clk;
+
+	mdelay(delay);
+
+	printf("Write seq (type=%d) starting with %#x, len=%d\n",type, data[0], size);
+
+	switch (type) {
+	case MIPI_DSI_DCS_SHORT_WRITE:
+	case MIPI_DSI_DCS_SHORT_WRITE_PARAM:
+		if (size < 2)
+			return -EINVAL;
+		exynos_mipi_dsi_write_header(dev, type, data[0], data[1]);
+		break;
+	case MIPI_DSI_DCS_LONG_WRITE:
+		exynos_mipi_dsi_long_write(dev, data, size);
+		exynos_mipi_dsi_write_header(dev, type, size & 0xff, (size & 0xff00) >> 8);
+		break;
+	default:
+		printf("%s: type %d not supported\n", __func__, type);
+		return -EOPNOTSUPP;
+	}
+
+	return 0;
 }

@@ -31,8 +31,8 @@ struct exynos_mipi_priv {
 	int e_interface;
 	int e_byte_clk;
 
-	int pll_stable_time;
-	int esc_clk;
+	u32 pll_stable_time;
+	u32 esc_clk;
 };
 
 int exynos_mipi_read_timing(struct udevice *dev,
@@ -44,5 +44,7 @@ int exynos_mipi_prepare(struct udevice *dev);
 void exynos_mipi_hs_enable(struct udevice *dev);
 void exynos_mipi_set_display_mode(struct udevice *dev,
 		const struct display_timing *timing);
+int exynos_mipi_dsi_write(struct udevice *dev, enum dsi_cmd_type type,
+		unsigned char *data, size_t size);
 
 #endif

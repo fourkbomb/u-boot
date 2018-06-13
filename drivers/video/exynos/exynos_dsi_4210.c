@@ -136,6 +136,7 @@ static int exynos_mipi_probe(struct udevice *dev)
 static const struct dm_display_ops exynos_mipi_dsi_ops = {
 	.read_timing = exynos_mipi_read_timing,
 	.enable = exynos_mipi_enable,
+	.write = exynos_mipi_dsi_write,
 };
 
 static const struct udevice_id exynos_mipi_dsi_ids[] = {

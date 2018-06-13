@@ -26,6 +26,21 @@ static int do_dev(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
 	char *name;
 	int ret = -ENODEV;
+	struct udevice *disp;
+	struct display_timing t;
+	int ret2;
+	printf("Probing display\n");
+	ret2 = uclass_get_device(UCLASS_DISPLAY, 0, &disp);
+	if (!ret2) {
+		printf("Read timing\n");
+		ret2 = display_read_timing(disp, &t);
+		if (!ret2) {
+			printf("Enable display\n");
+			ret2 = display_enable(disp, 24, &t);
+			printf("Enabled display\n");
+		}
+	}
+	printf("Display was probed: %d\n", ret2);
 
 	switch (argc) {
 	case 2:

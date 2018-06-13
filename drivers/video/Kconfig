@@ -451,6 +451,10 @@ config VIDEO_IVYBRIDGE_IGD
 
 source "drivers/video/exynos/Kconfig"
 
+config S6E8AX0
+	bool "Enable Samsung S6E8AX0 AMOLED panel support"
+	depends on DM_VIDEO && DM_REGULATOR && DM_GPIO
+
 config VIDEO_FSL_DCU_FB
 	bool "Enable Freescale Display Control Unit"
 	depends on VIDEO

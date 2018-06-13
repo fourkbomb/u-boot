@@ -218,6 +218,8 @@ int exynos_init(void)
 {
 	board_gpio_init();
 
+	set_system_display_ctrl();
+
 	/* Enable MIPI */
 	set_mipi_phy_ctrl(0, 1);
 

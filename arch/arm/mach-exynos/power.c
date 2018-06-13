@@ -56,7 +56,7 @@ void set_mipi_phy_ctrl(unsigned int dev_index, unsigned int enable)
 {
 	if (proid_is_exynos4210())
 		exynos4210_mipi_phy_control(dev_index, enable);
-	else if (prodid_is_exynos4412())
+	else if (proid_is_exynos4412())
 		exynos4412_mipi_phy_control(dev_index, enable);
 }
 
