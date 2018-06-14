@@ -11,6 +11,7 @@
 	aliases {
 		i2c8 = &i2c_max77693;
 		i2c9 = &i2c_fg;
+		i2c10 = &i2c_an30259a;
 		mmc0 = &mshc_0;
 		mmc1 = &sdhci2;
 	};
@@ -98,6 +99,38 @@
 			};
 		};
 	};
+
+	i2c_an30259a: an30259a {
+		compatible = "i2c-gpio";
+		gpios = <&gpf2 7 GPIO_ACTIVE_HIGH>, /* sda */
+			<&gpf2 6 GPIO_ACTIVE_HIGH>; /* scl */
+		i2c-gpio,delay-us = <2>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		an30259a@30 {
+			compatible = "panasonic,an30259a";
+			reg = <0x30>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			red@1 {
+				reg = <1>;
+				label = "red";
+			};
+
+			green@2 {
+				reg = <2>;
+				label = "green";
+			};
+
+			blue@3 {
+				reg = <3>;
+				label = "blue";
+			};
+		};
+	};
+
 };
 
 &i2c_7 {
