@@ -7,9 +7,11 @@
 #include <common.h>
 #include <asm/gpio.h>
 #include <asm/arch/gpio.h>
+#include <asm/arch/power.h>
 #include <console.h>
 #include <dm/uclass.h>
 #include <extcon.h>
+#include <led.h>
 #include <linux/libfdt.h>
 #include <mmc.h>
 #include <power/max77686_pmic.h>
@@ -86,18 +88,6 @@ int get_board_rev(void) {
 	return board_rev;
 }
 
-static int i9300_check_keycombo(void)
-{
-	int ret = 0;
-
-	ret |= !gpio_get_value(EXYNOS4X12_GPIO_X27) << KEY_POWER;
-	ret |= !gpio_get_value(EXYNOS4X12_GPIO_X22) << KEY_VOL_UP;
-	ret |= !gpio_get_value(EXYNOS4X12_GPIO_X33) << KEY_VOL_DOWN;
-	ret |= !gpio_get_value(EXYNOS4X12_GPIO_X01) << KEY_HOME;
-
-	return ret;
-}
-
 static void board_gpio_init(void)
 {
 	/* power and volume keys are externally pulled up */
@@ -128,7 +118,7 @@ static void board_gpio_init(void)
 static int i9300_check_battery(void)
 {
 	struct udevice *bat, *extcon, *charger;
-	int ret, state, current;
+	int ret, state, current, old_soc, soc;
 
 	ret = uclass_get_device(UCLASS_BATTERY, 0, &bat);
 	if (ret) {
@@ -148,6 +138,7 @@ static int i9300_check_battery(void)
 		return current;
 	}
 
+	old_soc = battery_get_soc(bat);
 	state = battery_get_status(bat);
 	if (state != BAT_STATE_NEED_CHARGING) {
 		printf("%s: Battery soc is OK\n", __func__);
@@ -167,15 +158,22 @@ static int i9300_check_battery(void)
 	}
 
 	printf("Need charging: charging at %d uA\n", current);
-	/* Wait 1 second to allow charger to be connected */
-	mdelay(1000);
+	i9300_led_action(LED_RED | LED_GREEN | LED_BLUE, LEDST_ON);
+	mdelay(500);
+	i9300_led_action(LED_RED | LED_GREEN | LED_BLUE, LEDST_OFF);
 	if (charger_get_status(charger) == CHARGE_STATE_DISCHARGING) {
-		printf("error: not charging. should probably shut down now...\n");
-	} else {
-		printf("charging!\n");
-		/* TODO: wait until no longer at critical SoC, then boot into LPM */
+		printf("error: not charging. shutting down.");
+		return BATTERY_ABORT;
 	}
-	return 0;
+
+	printf("charging!\n");
+	while (battery_get_status(bat) == BAT_STATE_NEED_CHARGING) {
+		soc = battery_get_soc(bat);
+		printf("%s: SoC started at %d, now %d\n", __func__, old_soc, soc);
+		i9300_led_action(LED_RED, LEDST_TOGGLE);
+		mdelay(500);
+	}
+	return BATTERY_LPM;
 }
 
 static int i9300_phy_control(int on)
@@ -318,6 +316,59 @@ int ft_board_setup(void *blob, bd_t *bd)
 }
 #endif
 
+static enum boot_mode i9300_check_keycombo(void)
+{
+	int ret = 0;
+
+	ret |= !gpio_get_value(EXYNOS4X12_GPIO_X27) << KEY_POWER;
+	ret |= !gpio_get_value(EXYNOS4X12_GPIO_X22) << KEY_VOL_UP;
+	ret |= !gpio_get_value(EXYNOS4X12_GPIO_X33) << KEY_VOL_DOWN;
+	ret |= !gpio_get_value(EXYNOS4X12_GPIO_X01) << KEY_HOME;
+
+	switch (ret) {
+	case COMBO_RECOVERY:
+		return MODE_RECOVERY;
+	case COMBO_FASTBOOT:
+		return MODE_FASTBOOT;
+	case COMBO_UBOOT_CONSOLE:
+		return MODE_CONSOLE;
+	}
+
+	return 0;
+}
+
+static enum boot_mode i9300_get_boot_mode(void)
+{
+	struct exynos4412_power *pwr = (struct exynos4412_power *)samsung_get_base_power();
+
+	u32 inform = readl(&pwr->inform3);
+	printf("inform3: 0x%08x: ", inform);
+	if ((inform & ~MODE_MAX) != INFORM_MAGIC) {
+		printf("invalid\n");
+		return MODE_NONE;
+	}
+
+	inform &= MODE_MAX;
+
+	printf("boot mode: %#x\n", inform);
+	if (inform >= MODE_LAST)
+		return MODE_NONE;
+
+	return inform;
+}
+
+static void i9300_power_off(void)
+{
+	struct exynos4412_power *pwr = (struct exynos4412_power *)samsung_get_base_power();
+
+	writel(readl(&pwr->ps_hold_control) & 0xfffffeff, &pwr->ps_hold_control);
+
+	while (1) {
+		i9300_led_action(LED_RED | LED_GREEN, LEDST_TOGGLE);
+		mdelay(400);
+	}
+}
+
 int exynos_init(void)
 {
 	board_gpio_init();
@@ -330,29 +381,37 @@ int exynos_late_init(void)
 {
 	board_load_info();
 
-	int keys = i9300_check_keycombo();
-	int state = i9300_check_battery();
+	enum boot_mode mode = i9300_get_boot_mode();
+	if (mode == MODE_NONE)
+		mode = i9300_check_keycombo();
 
-	if (state > 0) {
-		printf("low power mode\n");
+	enum battery_boot_mode bat_state = i9300_check_battery();
+	if (bat_state == BATTERY_ABORT) {
+		/* release PS_HOLD - turn off board */
+		i9300_power_off();
 	}
 
-	if (keys == COMBO_RECOVERY) {
-		printf("Booting to recovery\n");
-		i9300_enable_leds(LED_RED);
-		env_set("bootcmd", "run recoveryboot");
-	} else if (keys == COMBO_FASTBOOT) {
+	switch (mode) {
+	case MODE_FASTBOOT:
 		printf("Activating fastboot mode\n");
-		i9300_enable_leds(LED_BLUE);
+		i9300_led_action(LED_BLUE, LEDST_ON);
 		env_set("bootcmd", "run fastboot");
-	} else if (keys == COMBO_UBOOT_CONSOLE) {
+		break;
+	case MODE_RECOVERY:
+		printf("Booting to recovery\n");
+		i9300_led_action(LED_RED, LEDST_ON);
+		env_set("bootcmd", "run recoveryboot");
+		break;
+	case MODE_CONSOLE:
 		printf("Dropping into u-boot console\n");
-		i9300_enable_leds(LED_GREEN);
-		env_set("bootcmd", "");
-	} else {
+		i9300_led_action(LED_GREEN, LEDST_ON);
+		env_set("bootcmd", NULL);
+		break;
+	default:
 		printf("Booting normally...\n");
-		i9300_enable_leds(LED_GREEN | LED_RED);
+		i9300_led_action(LED_GREEN | LED_RED, LEDST_ON);
 		env_set("bootcmd", "run autoboot");
+
 	}
 
 	return 0;

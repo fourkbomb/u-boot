@@ -25,12 +25,12 @@ static int i9300_set_led(const char *name, enum led_state_t state)
 	return led_set_state(dev, state);
 }
 
-int i9300_enable_leds(int mask)
+int i9300_led_action(int mask, enum led_state_t state)
 {
 	int ret;
 	for (int i = 0; i < ARRAY_SIZE(leds); i++) {
 		if (mask & (1 << i)) {
-			ret = i9300_set_led(leds[i], LEDST_ON);
+			ret = i9300_set_led(leds[i], state);
 			if (ret) {
 				return ret;
 			}
@@ -39,3 +39,4 @@ int i9300_enable_leds(int mask)
 
 	return 0;
 }
+
