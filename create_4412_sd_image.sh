@@ -23,18 +23,11 @@ fwbl1_size=16
 bl2_size=32
 #1024kB
 uboot_size=2048
-#160kB
-tzsw_size=320
-#16kB
-env_size=32
 
 reserved_position=0
 fwbl1_pos=$(($reserved_position + $reserved_size))
 bl2_pos=$(($fwbl1_pos + $fwbl1_size))
 uboot_pos=$(($bl2_pos + $bl2_size))
-tzsw_pos=$(($uboot_pos + $uboot_size))
-env_pos=$(($tzsw_pos + $tzsw_size))
-#env_pos=$(($uboot_pos + $uboot_size))
 
 ####################################
 echo "Exynos4412 FWBL1 fusing"
@@ -45,12 +38,6 @@ dd if=spl/i9300-spl.bin of=$1 bs=$block_size seek=$bl2_pos
 ####################################
 echo "Exynos4412 bootloader fusing"
 dd if=./u-boot.bin of=$1 bs=$block_size seek=$uboot_pos
-####################################
-echo "Exynos4412 tzsw fusing"
-#dd if=./gcam_tzsw.bin of=$1 bs=$block_size seek=$tzsw_pos
-####################################
-echo "Filling env with zeroes.."
-dd if=/dev/zero of=$1 bs=$block_size count=$env_size seek=$env_pos
 ####################################
 
 sync
