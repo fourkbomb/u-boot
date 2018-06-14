@@ -4,4 +4,4 @@
 # SPDX-License-Identifier:	GPL-2.0+
 #
 
-obj-y	+= i9300.o
+obj-y	+= i9300.o led.o
