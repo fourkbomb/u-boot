@@ -4,9 +4,26 @@
     },
     "partitions": [
         {
-            "label": "bootinfo",
-            "size": "12561920",
-            "position": -4
+            "label": "env",
+            "size": "64 KiB",
+            "position": -10
+        },
+        {
+            "label": "bootloader",
+            "size": "2 MiB",
+            "type_guid": "brillo_bootloader",
+            "position": -9
+        },
+        {
+            "label": "misc",
+            "size": "2 MiB",
+            "type_guid": "brillo_misc",
+            "position": -8
+        },
+        {
+            "label": "padding",
+            "size": "8302080",
+            "position": -7
         },
         {
             "label": "efs",
@@ -27,11 +44,6 @@
         {
             "label": "recovery",
             "size": "24 MiB"
-        },
-        {
-            "label": "misc",
-            "size": "1 MiB",
-            "type_guid": "brillo_misc"
         },
         {
             "label": "system",
