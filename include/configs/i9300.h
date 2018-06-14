@@ -65,9 +65,6 @@
 #define CONFIG_IPADDR 192.168.4.1
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
-	"loadk=" \
-		"mmc dev 0 0; mmc read 0x50000000 0x14000 0x4000;" \
-		"load mmc 0:a 0x60000000 /exynos4412-midas.dtb\0" \
 	"nc=" \
 		"setenv stdout nc;setenv stdin nc\0" \
 	"sd=" /* load kernel from SD card */\
@@ -79,13 +76,15 @@
 	"sdupdate=" /* install updated u-boot from bootable SD card */ \
 		"mmc dev 1; mmc read 0x50000000 0x1 0x1000;" \
 		"mmc dev 0 1; mmc write 0x50000000 0x0 0x1000;\0" \
-	"mmcbootpart=3\0" \
-	"mmcrecoverypart=5\0" \
-	"mmcbootinfopart=0\0" \
+	"mmcbootpart=6\0" \
+	"mmcrecoverypart=8\0" \
 	"mmcboot=" \
 		"read mmc 0:${mmcbootpart} 0x50000000 0x0 0xbfff; bootm 0x50000000\0" \
 	"mmcrecovery=" \
-		"read mmc 0:${mmcrecoverypart} 0x50000000 0x0 0xbfff; bootm 0x50000000\0"
+		"read mmc 0:${mmcrecoverypart} 0x50000000 0x0 0xbfff; bootm 0x50000000\0" \
+	"autoboot=run mmcboot\0" \
+	"recoveryboot=run mmcrecovery\0" \
+	"fastboot=fastboot 0; run autoboot\0" \
 
 #include <linux/sizes.h>
 
