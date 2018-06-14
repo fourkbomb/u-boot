@@ -7,17 +7,35 @@
 #include <common.h>
 #include <asm/gpio.h>
 #include <asm/arch/gpio.h>
+#include <console.h>
+#include <dm/uclass.h>
 #include <extcon.h>
 #include <linux/libfdt.h>
 #include <mmc.h>
 #include <power/max77686_pmic.h>
 #include <power/max77693_muic.h>
+#include <power/battery.h>
+#include <power/charger.h>
 #include <power/pmic.h>
 #include <power/regulator.h>
 #include <usb.h>
 #include <usb/dwc2_udc.h>
 
 DECLARE_GLOBAL_DATA_PTR;
+
+#define KEY_POWER (0)
+#define KEY_VOL_UP (1)
+#define KEY_VOL_DOWN (2)
+#define KEY_HOME (3)
+
+#define COMBO_POWER (1 << KEY_POWER)
+#define COMBO_VOL_UP (1 << KEY_VOL_UP)
+#define COMBO_VOL_DOWN (1 << KEY_VOL_DOWN)
+#define COMBO_HOME (1 << KEY_HOME)
+
+#define COMBO_RECOVERY (COMBO_POWER | COMBO_VOL_UP | COMBO_HOME)
+#define COMBO_FASTBOOT (COMBO_POWER | COMBO_VOL_DOWN | COMBO_HOME)
+#define COMBO_UBOOT_CONSOLE (COMBO_POWER | COMBO_VOL_UP | COMBO_VOL_DOWN)
 
 static uint64_t board_serial = 0;
 static char board_rev = 0xff;
@@ -66,12 +84,96 @@ int get_board_rev(void) {
 	return board_rev;
 }
 
+static int i9300_check_keycombo(void)
+{
+	int ret = 0;
+
+	ret |= !gpio_get_value(EXYNOS4X12_GPIO_X27) << KEY_POWER;
+	ret |= !gpio_get_value(EXYNOS4X12_GPIO_X22) << KEY_VOL_UP;
+	ret |= !gpio_get_value(EXYNOS4X12_GPIO_X33) << KEY_VOL_DOWN;
+	ret |= !gpio_get_value(EXYNOS4X12_GPIO_X01) << KEY_HOME;
+
+	return ret;
+}
+
 static void board_gpio_init(void)
 {
-	/* GPX2[7] - power key */
+	/* power and volume keys are externally pulled up */
+	/*
+	 * GPX2[7] - power key. If we don't set pull to none within 8 seconds,
+	 * PMIC thinks power key is being held down and will reset the board.
+	 */
 	gpio_request(EXYNOS4X12_GPIO_X27, "nPOWER");
 	gpio_cfg_pin(EXYNOS4X12_GPIO_X27, S5P_GPIO_INPUT);
 	gpio_set_pull(EXYNOS4X12_GPIO_X27, S5P_GPIO_PULL_NONE);
+
+	/* GPX2[2] - volume up */
+	gpio_request(EXYNOS4X12_GPIO_X22, "VOL_UP");
+	gpio_cfg_pin(EXYNOS4X12_GPIO_X22, S5P_GPIO_INPUT);
+	gpio_set_pull(EXYNOS4X12_GPIO_X22, S5P_GPIO_PULL_NONE);
+
+	/* GPX3[3] - volume down */
+	gpio_request(EXYNOS4X12_GPIO_X33, "VOL_DOWN");
+	gpio_cfg_pin(EXYNOS4X12_GPIO_X33, S5P_GPIO_INPUT);
+	gpio_set_pull(EXYNOS4X12_GPIO_X33, S5P_GPIO_PULL_NONE);
+
+	/* GPX0[1] - home key */
+	gpio_request(EXYNOS4X12_GPIO_X01, "HOME");
+	gpio_cfg_pin(EXYNOS4X12_GPIO_X01, S5P_GPIO_INPUT);
+	gpio_set_pull(EXYNOS4X12_GPIO_X01, S5P_GPIO_PULL_NONE);
+}
+
+static int i9300_check_battery(void)
+{
+	struct udevice *bat, *extcon, *charger;
+	int ret, state, current;
+
+	ret = uclass_get_device(UCLASS_BATTERY, 0, &bat);
+	if (ret) {
+		printf("%s: failed to get battery device: %d\n", __func__, ret);
+		return ret;
+	}
+
+	ret = uclass_get_device(UCLASS_EXTCON, 0, &extcon);
+	if (ret) {
+		printf("%s: failed to get extcon device: %d\n", __func__, ret);
+		return ret;
+	}
+
+	current = extcon_get_max_charge_current(extcon);
+	if (current < 0) {
+		printf("%s: Failed to get max charge current: %d\n", __func__, current);
+		return current;
+	}
+
+	state = battery_get_status(bat);
+	if (state != BAT_STATE_NEED_CHARGING) {
+		printf("%s: Battery soc is OK\n", __func__);
+		return current > 0;
+	}
+
+	ret = uclass_get_device(UCLASS_CHARGER, 0, &charger);
+	if (ret) {
+		printf("%s: failed to get charger device: %d\n", __func__, ret);
+		return ret;
+	}
+
+	ret = charger_set_current(charger, current);
+	if (ret < 0) {
+		printf("%s: Failed to set charge current: %d\n", __func__, ret);
+		return ret;
+	}
+
+	printf("Need charging: charging at %d uA\n", current);
+	/* Wait 1 second to allow charger to be connected */
+	mdelay(1000);
+	if (charger_get_status(charger) == CHARGE_STATE_DISCHARGING) {
+		printf("error: not charging. should probably shut down now...\n");
+	} else {
+		printf("charging!\n");
+		/* TODO: wait until no longer at critical SoC, then boot into LPM */
+	}
+	return 0;
 }
 
 static int i9300_phy_control(int on)
@@ -218,12 +320,34 @@ int exynos_init(void)
 {
 	board_gpio_init();
 
+	printf("Key combo: %#x\n", i9300_check_keycombo());
 	return 0;
 }
 
 int exynos_late_init(void)
 {
 	board_load_info();
+
+	int keys = i9300_check_keycombo();
+	int state = i9300_check_battery();
+
+	if (state > 0) {
+		printf("low power mode\n");
+	}
+
+	if (keys == COMBO_RECOVERY) {
+		printf("Booting to recovery\n");
+		env_set("bootcmd", "run recoveryboot");
+	} else if (keys == COMBO_FASTBOOT) {
+		printf("Activating fastboot mode\n");
+		env_set("bootcmd", "run fastboot");
+	} else if (keys == COMBO_UBOOT_CONSOLE) {
+		printf("Dropping into u-boot console\n");
+		env_set("bootcmd", "");
+	} else {
+		printf("Booting normally...\n");
+		env_set("bootcmd", "run autoboot");
+	}
 
 	return 0;
 }
