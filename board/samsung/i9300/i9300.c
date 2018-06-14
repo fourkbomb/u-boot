@@ -342,6 +342,8 @@ static enum boot_mode i9300_get_boot_mode(void)
 	struct exynos4412_power *pwr = (struct exynos4412_power *)samsung_get_base_power();
 
 	u32 inform = readl(&pwr->inform3);
+	/* clear out inform3 for subsequent boots */
+	writel(0, &pwr->inform3);
 	printf("inform3: 0x%08x: ", inform);
 	if ((inform & ~MODE_MAX) != INFORM_MAGIC) {
 		printf("invalid\n");
