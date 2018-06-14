@@ -36,28 +36,27 @@
 #define CONFIG_SPL_MAX_FOOTPRINT ((14 << 10) - 4)
 
 /*
- * SD boot
+ * SD boot: note that this is not used when booting off the eMMC.
  * 512b reserved
  * 8K BL1
- * 14K SPL
- * 512K u-boot (?)
- * 16K env
+ * 14K SPL, padded to 16K
+ * 1024K u-boot (?)
  */
 #define CONFIG_RES_BLOCK_SIZE (512)
 #define CONFIG_BL1_SIZE (8 << 10) /* 8K for BL1 */
 #define CONFIG_SPL_SIZE (16 << 10) /* 14K for SPL (BL2). 4 byte checksum. Padded to 16K */
 #define CONFIG_BL2_SIZE (1024 << 10) /* 1024K u-boot */
-#define CONFIG_ENV_SIZE (16 << 10) /* 16K for env */
 
 #define CONFIG_BL2_OFFSET (CONFIG_RES_BLOCK_SIZE + CONFIG_BL1_SIZE + CONFIG_SPL_SIZE)
 
 #define BL2_START_OFFSET (CONFIG_BL2_OFFSET/512)
 #define BL2_SIZE_BLOC_COUNT (CONFIG_BL2_SIZE/512)
 
-/* env on eMMC */
+/* env on eMMC, in the "bootinfo" partition */
 #define CONFIG_SYS_MMC_ENV_DEV 0
-#define CONFIG_SYS_MMC_ENV_PART 1
-#define CONFIG_ENV_OFFSET (CONFIG_BL1_SIZE + CONFIG_SPL_SIZE + CONFIG_BL2_SIZE)
+#define CONFIG_SYS_MMC_ENV_PART 0
+#define CONFIG_ENV_SIZE (64 << 10) /* 64K for env */
+#define CONFIG_ENV_OFFSET (32 << 10) /* env at LBA 0x40 */
 
 
 /* Boot off EMMC */
