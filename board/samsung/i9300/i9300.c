@@ -116,8 +116,8 @@ static int i9300_phy_control(int on)
 				break;
 			if (ctrlc())
 				break;
-			mdelay(1000);
-		} while (i++ < 10);
+			mdelay(10);
+		} while (i++ < 10000);
 
 		if (!(type & EXTCON_TYPE_USB)) {
 			pr_info("No USB cable detected, aborting!\n");
