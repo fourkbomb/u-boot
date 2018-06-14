@@ -21,6 +21,8 @@
 #include <usb.h>
 #include <usb/dwc2_udc.h>
 
+#include "i9300.h"
+
 DECLARE_GLOBAL_DATA_PTR;
 
 #define KEY_POWER (0)
@@ -337,15 +339,19 @@ int exynos_late_init(void)
 
 	if (keys == COMBO_RECOVERY) {
 		printf("Booting to recovery\n");
+		i9300_enable_leds(LED_RED);
 		env_set("bootcmd", "run recoveryboot");
 	} else if (keys == COMBO_FASTBOOT) {
 		printf("Activating fastboot mode\n");
+		i9300_enable_leds(LED_BLUE);
 		env_set("bootcmd", "run fastboot");
 	} else if (keys == COMBO_UBOOT_CONSOLE) {
 		printf("Dropping into u-boot console\n");
+		i9300_enable_leds(LED_GREEN);
 		env_set("bootcmd", "");
 	} else {
 		printf("Booting normally...\n");
+		i9300_enable_leds(LED_GREEN | LED_RED);
 		env_set("bootcmd", "run autoboot");
 	}
 
