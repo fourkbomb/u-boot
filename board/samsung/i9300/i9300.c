@@ -276,6 +276,14 @@ struct dwc2_plat_otg_data exynos4_otg_data = {
 	.usb_flags = PHY0_SLEEP,
 };
 
+int fb_set_reboot_flag(void)
+{
+	struct exynos4412_power *pwr = (struct exynos4412_power *)samsung_get_base_power();
+
+	writel(INFORM_MAGIC | MODE_FASTBOOT, &pwr->inform3);
+	return 0;
+}
+
 int board_usb_init(int index, enum usb_init_type init)
 {
 	pr_info("Board usb init! %d %d\n", index, init);
