@@ -9,6 +9,13 @@ config LED
 	  can provide access to board-specific LEDs. Use of the device tree
 	  for configuration is encouraged.
 
+config LED_AN30259A
+	bool "LED Support for Panasonic AN30259A"
+	depends on LED && DM_I2C
+	help
+	  This option enables support for the Panasonic AN30259A 3-channel
+	  LED controller. It supports turning LEDs on and off.
+
 config LED_BCM6328
 	bool "LED Support for BCM6328"
 	depends on LED && ARCH_BMIPS
