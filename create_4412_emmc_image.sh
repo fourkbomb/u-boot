@@ -40,9 +40,6 @@ dd if=spl/i9300-spl.bin of=$1 bs=$block_size seek=$bl2_pos
 echo "Exynos4412 bootloader fusing"
 dd if=./u-boot.bin of=$1 bs=$block_size seek=$uboot_pos
 ####################################
-echo "Filling env with zeroes.."
-dd if=/dev/zero of=$1 bs=$block_size count=$env_size seek=$env_pos
-####################################
 
 sync
 #<Message Display>
