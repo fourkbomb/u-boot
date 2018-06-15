@@ -151,6 +151,9 @@ static int i9300_check_battery(void)
 		return ret;
 	}
 
+	if (current == 0)
+		current = 460 * 1000;
+
 	ret = charger_set_current(charger, current);
 	if (ret < 0) {
 		printf("%s: Failed to set charge current: %d\n", __func__, ret);
