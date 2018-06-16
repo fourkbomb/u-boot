@@ -80,9 +80,9 @@
 	"mmcbootpart=6\0" /* Partition number containing boot image */ \
 	"mmcrecoverypart=8\0" /* Partition number containing recovery image */ \
 	"mmcboot=" /* Command to boot OS from eMMC */ \
-		"read mmc 0:${mmcbootpart} 0x50000000 0x0 0xbfff; bootm 0x50000000\0" \
+		"run setbootargs; read mmc 0:${mmcbootpart} 0x50000000 0x0 0xbfff; bootm 0x50000000\0" \
 	"mmcrecovery=" /* Command to boot recovery from eMMC */ \
-		"read mmc 0:${mmcrecoverypart} 0x50000000 0x0 0xbfff; bootm 0x50000000\0" \
+		"run setbootargs; read mmc 0:${mmcrecoverypart} 0x50000000 0x0 0xbfff; bootm 0x50000000\0" \
 	"autoboot=run mmcboot\0" /* Run on normal boot */ \
 	"recoveryboot=run mmcrecovery\0" /* Run on recovery keycombo/INFORM3 value */ \
 	"fastboot=fastboot 0; run autoboot\0" /* Run on fastboot keycombo/INFORM3 value */ \
@@ -92,7 +92,10 @@
 	"dommcupdate=" /* install u-boot in bootloader partition to actual partition */ \
 		"read mmc 0:${mmcbootloaderpart} 0x50000000 0x0 0xfff &&" \
 		"run readsb20 && run checksb20 && mmc dev 0 1 && mmc write 0x50000000 0x0 0x1000 && run clearsb20\0" \
-	"mmcupdate=if run dommcupdate; then echo Bootloader upgrade succeeded; else echo Bootloader upgrade failed.\0"
+	"mmcupdate=if run dommcupdate; then echo Bootloader upgrade succeeded; else echo Bootloader upgrade failed.; fi\0" \
+	"bootargs=console=ttySAC2,115200\0" \
+	"selinuxmode=permissive\0" \
+	"setbootargs=setenv bootargs ${bootargs} androidboot.mode=${bootmode} androidboot.hardware=midas androidboot.selinux=${selinuxmode} androidboot.revision=${board_rev} androidboot.serialno=${serial#}\0" \
 
 #include <linux/sizes.h>
 
