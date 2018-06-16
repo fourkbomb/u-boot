@@ -142,7 +142,7 @@ static int i9300_check_battery(void)
 	state = battery_get_status(bat);
 	if (state != BAT_STATE_NEED_CHARGING) {
 		printf("%s: Battery soc is OK\n", __func__);
-		return current > 0;
+		return current > 0 ? BATTERY_LPM : BATTERY_NORMAL;
 	}
 
 	ret = uclass_get_device(UCLASS_CHARGER, 0, &charger);
@@ -343,7 +343,12 @@ static enum boot_mode i9300_check_keycombo(void)
 		return MODE_CONSOLE;
 	}
 
-	return 0;
+	/* Power key pressed means that LPM should be skipped.
+	 * TODO: there's probably a better way to determine wakeup source... */
+	if (ret & KEY_POWER)
+		return MODE_SKIP_LPM;
+
+	return MODE_NONE;
 }
 
 static enum boot_mode i9300_get_boot_mode(void)
@@ -392,6 +397,7 @@ int exynos_late_init(void)
 {
 	board_load_info();
 
+	env_set("bootmode", "normal");
 	enum boot_mode mode = i9300_get_boot_mode();
 	if (mode == MODE_NONE)
 		mode = i9300_check_keycombo();
@@ -400,6 +406,8 @@ int exynos_late_init(void)
 	if (bat_state == BATTERY_ABORT) {
 		/* release PS_HOLD - turn off board */
 		i9300_power_off();
+	} else if (bat_state == BATTERY_LPM && mode == MODE_NONE) {
+		env_set("bootmode", "lpm");
 	}
 
 	switch (mode) {
@@ -412,6 +420,7 @@ int exynos_late_init(void)
 		printf("Booting to recovery\n");
 		i9300_led_action(LED_RED, LEDST_ON);
 		env_set("bootcmd", "run recoveryboot");
+		env_set("bootmode", "recovery");
 		break;
 	case MODE_CONSOLE:
 		printf("Dropping into u-boot console\n");
