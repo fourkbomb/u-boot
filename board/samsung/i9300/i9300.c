@@ -301,7 +301,6 @@ int board_usb_cleanup(int index, enum usb_init_type init)
 #ifdef CONFIG_OF_BOARD_SETUP
 int ft_board_setup(void *blob, bd_t *bd)
 {
-#if 0
 	int ret;
 	/* we don't want the OS to think we're running under secure firmware */
 	int offs = fdt_node_offset_by_compatible(blob, 0, "samsung,secure-firmware");
@@ -315,14 +314,13 @@ int ft_board_setup(void *blob, bd_t *bd)
 	}
 
 	/* delete the node */
-	ret = fdt_setprop_string(blob, offs, "test", "blah");
+	ret = fdt_del_node(blob, offs);
 	if (ret < 0) {
 		printf("%s: failed to remove secure firmware node: %d\n", __func__, ret);
 		return -EINVAL;
 	}
 
 	printf("FDT set up for OS %p\n", blob);
-#endif
 	return 0;
 }
 #endif
