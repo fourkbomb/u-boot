@@ -55,8 +55,8 @@
 /* env on eMMC, in the "bootinfo" partition */
 #define CONFIG_SYS_MMC_ENV_DEV 0
 #define CONFIG_SYS_MMC_ENV_PART 0
-#define CONFIG_ENV_SIZE (64 << 10) /* 64K for env */
-#define CONFIG_ENV_OFFSET (32 << 10) /* env at LBA 0x40 */
+#define CONFIG_ENV_SIZE (63 << 9) /* 63 blocks for env */
+#define CONFIG_ENV_OFFSET (40 << 9) /* env at LBA 40 */
 
 
 /* Boot off EMMC */
