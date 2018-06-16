@@ -70,21 +70,29 @@
 	"sd=" /* load kernel from SD card */\
 		"mmc rescan; mmc dev 1; mmc read 0x50000000 0x800 0xa000;" \
 		"bootm 0x50000000;\0" \
-	"update=" /* install updated u-boot from partitioned SD card */ \
-		"mmc dev 1; mmc read 0x50000000 0xa800 0x1000;" \
-		"mmc dev 0 1; mmc write 0x50000000 0x0 0x1000;\0" \
-	"sdupdate=" /* install updated u-boot from bootable SD card */ \
-		"mmc dev 1; mmc read 0x50000000 0x1 0x1000;" \
-		"mmc dev 0 1; mmc write 0x50000000 0x0 0x1000;\0" \
-	"mmcbootpart=6\0" \
-	"mmcrecoverypart=8\0" \
-	"mmcboot=" \
+	"sdupdate=" /* install updated u-boot from partitioned SD card */ \
+		"mmc dev 1 && mmc read 0x50000000 0xa800 0x1000 && " \
+		"mmc dev 0 1 && mmc write 0x50000000 0x0 0x1000;\0" \
+	"bootsdupdate=" /* install updated u-boot from bootable SD card */ \
+		"mmc dev 1 && mmc read 0x50000000 0x1 0x1000 &&" \
+		"mmc dev 0 1 && mmc write 0x50000000 0x0 0x1000;\0" \
+	"mmcbootloaderpart=2\0" /* Partition number containing staging bootloader image */ \
+	"mmcbootpart=6\0" /* Partition number containing boot image */ \
+	"mmcrecoverypart=8\0" /* Partition number containing recovery image */ \
+	"mmcboot=" /* Command to boot OS from eMMC */ \
 		"read mmc 0:${mmcbootpart} 0x50000000 0x0 0xbfff; bootm 0x50000000\0" \
-	"mmcrecovery=" \
+	"mmcrecovery=" /* Command to boot recovery from eMMC */ \
 		"read mmc 0:${mmcrecoverypart} 0x50000000 0x0 0xbfff; bootm 0x50000000\0" \
-	"autoboot=run mmcboot\0" \
-	"recoveryboot=run mmcrecovery\0" \
-	"fastboot=fastboot 0; run autoboot\0" \
+	"autoboot=run mmcboot\0" /* Run on normal boot */ \
+	"recoveryboot=run mmcrecovery\0" /* Run on recovery keycombo/INFORM3 value */ \
+	"fastboot=fastboot 0; run autoboot\0" /* Run on fastboot keycombo/INFORM3 value */ \
+	"readsb20=setexpr.l h01 *0x50001fb0 && setexpr.l h02 *0x50001fb4 && setexpr.l h03 *0x50001fb8\0" /* In a valid BL1, this will be "SB20_CONTEXT" */ \
+	"checksb20=test ${h01} = 30324253 && test ${h02} = 4e4f435f && test ${h03} = 54584554\0" \
+	"clearsb20=env delete h01 h02 h03\0" \
+	"dommcupdate=" /* install u-boot in bootloader partition to actual partition */ \
+		"read mmc 0:${mmcbootloaderpart} 0x50000000 0x0 0xfff &&" \
+		"run readsb20 && run checksb20 && mmc dev 0 1 && mmc write 0x50000000 0x0 0x1000 && run clearsb20\0" \
+	"mmcupdate=if run dommcupdate; then echo Bootloader upgrade succeeded; else echo Bootloader upgrade failed.\0"
 
 #include <linux/sizes.h>
 
