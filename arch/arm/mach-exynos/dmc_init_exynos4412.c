@@ -9,6 +9,21 @@
 #include "common_setup.h"
 #include "exynos4412_setup.h"
 
+#define NR_TZASC_BANKS 4
+
+/* Allow non-secure and secure access to all memory */
+#define RA0_VAL 0xf0000000
+
+static void tzasc_init(void) {
+	unsigned int start = samsung_get_base_dmc_tzasc();
+	unsigned int end = start + (DMC_OFFSET * (NR_TZASC_BANKS - 1));
+
+	for (; start <= end; start += DMC_OFFSET) {
+		struct exynos4412_tzasc *asc = (struct exynos4412_tzasc *)start;
+		writel(RA0_VAL, &asc->region_attributes_0);
+	}
+}
+
 void mem_ctrl_init(int reset)
 {
 	struct exynos4_dmc *dmc = (struct exynos4_dmc *)samsung_get_base_dmc_ctrl();
@@ -123,6 +138,8 @@ void mem_ctrl_init(int reset)
 
 	writel(DMC_MEMCONTROL, &dmc->memcontrol);
 	writel(DMC_MEMCONTROL, &dmc1->memcontrol);
+
+	tzasc_init();
 
 }
 
