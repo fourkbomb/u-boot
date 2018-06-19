@@ -1,0 +1,7 @@
+/dts-v1/;
+#include "exynos4412-n710x.dtsi"
+
+/ {
+	model = "Samsung GT-N7105 board based on Exynos4412";
+	compatible = "samsung,n7105", "samsung,midas", "samsung,exynos4412", "samsung,exynos4";
+};
