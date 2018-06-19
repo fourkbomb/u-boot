@@ -80,9 +80,9 @@
 	"mmcbootpart=6\0" /* Partition number containing boot image */ \
 	"mmcrecoverypart=8\0" /* Partition number containing recovery image */ \
 	"mmcboot=" /* Command to boot OS from eMMC */ \
-		"run setbootargs; read mmc 0:${mmcbootpart} 0x50000000 0x0 0xbfff; bootm 0x50000000\0" \
+		"run setbootargs; read mmc 0:${mmcbootpart} 0x50000000 0x0 0xbfff && bootm 0x50000000; run fastboot\0" \
 	"mmcrecovery=" /* Command to boot recovery from eMMC */ \
-		"run setbootargs; read mmc 0:${mmcrecoverypart} 0x50000000 0x0 0xbfff; bootm 0x50000000\0" \
+		"run setbootargs; read mmc 0:${mmcrecoverypart} 0x50000000 0x0 0xbfff && bootm 0x50000000; run fastboot\0" \
 	"autoboot=run mmcboot\0" /* Run on normal boot */ \
 	"recoveryboot=run mmcrecovery\0" /* Run on recovery keycombo/INFORM3 value */ \
 	"fastboot=fastboot 0; run autoboot\0" /* Run on fastboot keycombo/INFORM3 value */ \
