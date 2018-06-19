@@ -141,7 +141,7 @@ static int i9300_check_battery(void)
 	old_soc = battery_get_soc(bat);
 	state = battery_get_status(bat);
 	if (state != BAT_STATE_NEED_CHARGING) {
-		printf("%s: Battery soc is OK\n", __func__);
+		printf("%s: Battery soc is OK - %d\n", __func__, old_soc);
 		return current > 0 ? BATTERY_LPM : BATTERY_NORMAL;
 	}
 
@@ -160,11 +160,16 @@ static int i9300_check_battery(void)
 		return ret;
 	}
 
-	printf("Need charging: charging at %d uA\n", current);
-	i9300_led_action(LED_RED | LED_GREEN | LED_BLUE, LEDST_ON);
-	mdelay(500);
+	printf("Need charging: current charge level %d%, will charge at %d uA\n", battery_get_soc(bat), current);
+	for (int i = 0; i < 50; i++) {
+		i9300_led_action(LED_RED | LED_GREEN | LED_BLUE, LEDST_TOGGLE);
+		mdelay(500);
+		if (charger_get_status(charger) != CHARGE_STATE_DISCHARGING)
+			break;
+	}
 	i9300_led_action(LED_RED | LED_GREEN | LED_BLUE, LEDST_OFF);
-	if (charger_get_status(charger) == CHARGE_STATE_DISCHARGING) {
+	if (charger_get_status(charger) == CHARGE_STATE_DISCHARGING ||
+			charger_get_status(charger) == CHARGE_STATE_UNKNOWN) {
 		printf("error: not charging. shutting down.");
 		return BATTERY_ABORT;
 	}
