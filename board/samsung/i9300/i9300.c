@@ -390,6 +390,15 @@ static void i9300_power_off(void)
 	}
 }
 
+#if defined(CONFIG_MULTI_DTB_FIT)
+int board_fit_config_name_match(const char *name)
+{
+	if (!strcmp(name, "samsung,midas"))
+		return 0;
+	return -1;
+}
+#endif
+
 int exynos_init(void)
 {
 	board_gpio_init();
