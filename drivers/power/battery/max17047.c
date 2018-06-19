@@ -16,7 +16,6 @@
 #define AVG_SAMPLE_COUNT 5
 
 #define MAX17047_EXT_VOLTAGE_THRESH 3850000
-#define MAX17047_LOW_VOLTAGE_THRESH 3600000
 
 struct max17047_fg_data {
 	u16 character0[CHARACTER_SIZE];
@@ -113,7 +112,7 @@ static int max17047_get_status(struct udevice *dev)
 
 	if (voltage > MAX17047_EXT_VOLTAGE_THRESH)
 		return BAT_STATE_NOT_PRESENT;
-	else if (voltage < MAX17047_LOW_VOLTAGE_THRESH || soc < 5)
+	else if (soc < 5)
 		return BAT_STATE_NEED_CHARGING;
 
 	return BAT_STATE_NORMAL;
@@ -173,8 +172,6 @@ static int max17047_power_on_reset(struct udevice *dev)
 	soc = max17047_get_soc(dev);
 
 	debug("%s: vcell: %u, soc: %u\n", __func__, vcell, soc);
-	/* delay 500ms */
-	mdelay(500);
 
 	max17047_i2c_write(dev, MAX17047_CONFIG, 0x2310);
 
@@ -247,6 +244,8 @@ do_write:
 	status &= 0xfffd;
 	max17047_write_and_verify(dev, MAX17047_STATUS, status);
 
+	/* Totally arbitrary wait - make sure SoC is updated */
+	mdelay(1000);
 	debug("%s: POR completed successfully. SOC: %d\n", __func__, max17047_get_soc(dev));
 	return 0;
 }
