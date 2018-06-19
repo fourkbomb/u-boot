@@ -1,0 +1,12 @@
+/dts-v1/;
+#include "exynos4412-midas.dts"
+
+&ldo13_reg {
+	regulator-name = "VCC_1.8V_LCD";
+};
+
+&ldo25_reg {
+	regulator-name = "VCI_3.0V_LCD";
+	regulator-min-microvolt = <3000000>;
+	regulator-max-microvolt = <3000000>;
+};

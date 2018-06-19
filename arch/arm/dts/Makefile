@@ -11,6 +11,11 @@ dtb-$(CONFIG_EXYNOS4) += exynos4210-origen.dtb \
 	exynos4210-smdkv310.dtb \
 	exynos4210-universal_c210.dtb \
 	exynos4210-trats.dtb \
+	exynos4412-i9300.dtb \
+	exynos4412-i9305.dtb \
+	exynos4412-midas.dtb \
+	exynos4412-n7100.dtb \
+	exynos4412-n7105.dtb \
 	exynos4412-trats2.dtb \
 	exynos4412-odroid.dtb
 
