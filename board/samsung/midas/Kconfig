@@ -1,0 +1,14 @@
+if TARGET_MIDAS
+
+config SYS_BOARD
+	default "midas"
+	help
+		Samsung Mobile's "midas" smartphone family based on Exynos 4412 support
+
+config SYS_VENDOR
+	default "samsung"
+
+config SYS_CONFIG_NAME
+	default "midas"
+
+endif
