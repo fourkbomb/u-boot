@@ -4,4 +4,4 @@
 # SPDX-License-Identifier:	GPL-2.0+
 #
 
-obj-y	+= midas.o led.o
+obj-y	+= board_detect.o midas.o led.o
