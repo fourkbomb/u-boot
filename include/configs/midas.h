@@ -1,5 +1,5 @@
-#ifndef __I9300_CONFIG_H__
-#define __I9300_CONFIG_H__
+#ifndef __MIDAS_CONFIG_H__
+#define __MIDAS_CONFIG_H__
 
 #define CONFIG_EXYNOS4
 

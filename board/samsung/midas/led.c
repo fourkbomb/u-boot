@@ -1,7 +1,7 @@
 #include <common.h>
 #include <dm/uclass.h>
 #include <led.h>
-#include "i9300.h"
+#include "midas.h"
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -11,7 +11,7 @@ static const char *leds[] = {
 	[BLUE] = "blue",
 };
 
-static int i9300_set_led(const char *name, enum led_state_t state)
+static int midas_set_led(const char *name, enum led_state_t state)
 {
 	struct udevice *dev;
 	int ret;
@@ -25,12 +25,12 @@ static int i9300_set_led(const char *name, enum led_state_t state)
 	return led_set_state(dev, state);
 }
 
-int i9300_led_action(int mask, enum led_state_t state)
+int midas_led_action(int mask, enum led_state_t state)
 {
 	int ret;
 	for (int i = 0; i < ARRAY_SIZE(leds); i++) {
 		if (mask & (1 << i)) {
-			ret = i9300_set_led(leds[i], state);
+			ret = midas_set_led(leds[i], state);
 			if (ret) {
 				return ret;
 			}
