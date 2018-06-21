@@ -2,7 +2,7 @@
 #include "exynos4412-galaxy-s3.dtsi"
 
 / {
-	model = "Samsung GT-I9300 based on Exynos4412";
-	compatible = "samsung,i9300", "samsung,midas", "samsung,exynos4412", "samsung,exynos4";
+	model = "Samsung GT-I9305 based on Exynos4412";
+	compatible = "samsung,i9305", "samsung,midas", "samsung,exynos4412", "samsung,exynos4";
 };
 
