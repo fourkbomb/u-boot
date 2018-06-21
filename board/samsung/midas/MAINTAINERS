@@ -1,0 +1,6 @@
+Samsung midas boards
+M:	Simon Shields <simon@lineageos.org>
+S:	Maintained
+F:	board/samsung/midas/
+F:	include/configs/midas.h
+F:	configs/midas_defconfig

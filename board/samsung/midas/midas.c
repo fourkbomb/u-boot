@@ -1,5 +1,5 @@
 /*
- * i9300 board file
+ * midas board file
  * Copyright (C) 2018 Simon Shields <simon@lineageos.org>
  *
  * SPDX-License-Identifier: GPL-2.0+
@@ -23,7 +23,7 @@
 #include <usb.h>
 #include <usb/dwc2_udc.h>
 
-#include "i9300.h"
+#include "midas.h"
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -115,7 +115,7 @@ static void board_gpio_init(void)
 	gpio_set_pull(EXYNOS4X12_GPIO_X01, S5P_GPIO_PULL_NONE);
 }
 
-static int i9300_check_battery(void)
+static int midas_check_battery(void)
 {
 	struct udevice *bat, *extcon, *charger;
 	int ret, state, current, old_soc, soc;
@@ -162,12 +162,12 @@ static int i9300_check_battery(void)
 
 	printf("Need charging: current charge level %d%, will charge at %d uA\n", battery_get_soc(bat), current);
 	for (int i = 0; i < 50; i++) {
-		i9300_led_action(LED_RED | LED_GREEN | LED_BLUE, LEDST_TOGGLE);
+		midas_led_action(LED_RED | LED_GREEN | LED_BLUE, LEDST_TOGGLE);
 		mdelay(500);
 		if (charger_get_status(charger) != CHARGE_STATE_DISCHARGING)
 			break;
 	}
-	i9300_led_action(LED_RED | LED_GREEN | LED_BLUE, LEDST_OFF);
+	midas_led_action(LED_RED | LED_GREEN | LED_BLUE, LEDST_OFF);
 	if (charger_get_status(charger) == CHARGE_STATE_DISCHARGING ||
 			charger_get_status(charger) == CHARGE_STATE_UNKNOWN) {
 		printf("error: not charging. shutting down.");
@@ -178,13 +178,13 @@ static int i9300_check_battery(void)
 	while (battery_get_status(bat) == BAT_STATE_NEED_CHARGING) {
 		soc = battery_get_soc(bat);
 		printf("%s: SoC started at %d, now %d\n", __func__, old_soc, soc);
-		i9300_led_action(LED_RED, LEDST_TOGGLE);
+		midas_led_action(LED_RED, LEDST_TOGGLE);
 		mdelay(500);
 	}
 	return BATTERY_LPM;
 }
 
-static int i9300_phy_control(int on)
+static int midas_phy_control(int on)
 {
 	int ret;
 	int type;
@@ -277,7 +277,7 @@ static int i9300_phy_control(int on)
 }
 
 struct dwc2_plat_otg_data exynos4_otg_data = {
-	.phy_control = i9300_phy_control,
+	.phy_control = midas_phy_control,
 	.regs_phy = EXYNOS4X12_USBPHY_BASE,
 	.regs_otg = EXYNOS4X12_USBOTG_BASE,
 	.usb_phy_ctrl = EXYNOS4X12_USBPHY_CONTROL,
@@ -300,7 +300,7 @@ int board_usb_init(int index, enum usb_init_type init)
 
 int board_usb_cleanup(int index, enum usb_init_type init)
 {
-	return i9300_phy_control(0);
+	return midas_phy_control(0);
 }
 
 #ifdef CONFIG_OF_BOARD_SETUP
@@ -330,7 +330,7 @@ int ft_board_setup(void *blob, bd_t *bd)
 }
 #endif
 
-static enum boot_mode i9300_check_keycombo(void)
+static enum boot_mode midas_check_keycombo(void)
 {
 	int ret = 0;
 
@@ -356,7 +356,7 @@ static enum boot_mode i9300_check_keycombo(void)
 	return MODE_NONE;
 }
 
-static enum boot_mode i9300_get_boot_mode(void)
+static enum boot_mode midas_get_boot_mode(void)
 {
 	struct exynos4412_power *pwr = (struct exynos4412_power *)samsung_get_base_power();
 
@@ -378,32 +378,24 @@ static enum boot_mode i9300_get_boot_mode(void)
 	return inform;
 }
 
-static void i9300_power_off(void)
+static void midas_power_off(void)
 {
 	struct exynos4412_power *pwr = (struct exynos4412_power *)samsung_get_base_power();
 
 	writel(readl(&pwr->ps_hold_control) & 0xfffffeff, &pwr->ps_hold_control);
 
 	while (1) {
-		i9300_led_action(LED_RED | LED_GREEN, LEDST_TOGGLE);
+		midas_led_action(LED_RED | LED_GREEN, LEDST_TOGGLE);
 		mdelay(400);
 	}
 }
 
-#if defined(CONFIG_MULTI_DTB_FIT)
-int board_fit_config_name_match(const char *name)
-{
-	if (!strcmp(name, "samsung,midas"))
-		return 0;
-	return -1;
-}
-#endif
 
 int exynos_init(void)
 {
 	board_gpio_init();
 
-	printf("Key combo: %#x\n", i9300_check_keycombo());
+	printf("Key combo: %#x\n", midas_check_keycombo());
 	return 0;
 }
 
@@ -412,14 +404,14 @@ int exynos_late_init(void)
 	board_load_info();
 
 	env_set("bootmode", "normal");
-	enum boot_mode mode = i9300_get_boot_mode();
+	enum boot_mode mode = midas_get_boot_mode();
 	if (mode == MODE_NONE)
-		mode = i9300_check_keycombo();
+		mode = midas_check_keycombo();
 
-	enum battery_boot_mode bat_state = i9300_check_battery();
+	enum battery_boot_mode bat_state = midas_check_battery();
 	if (bat_state == BATTERY_ABORT) {
 		/* release PS_HOLD - turn off board */
-		i9300_power_off();
+		midas_power_off();
 	} else if (bat_state == BATTERY_LPM && mode == MODE_NONE) {
 		env_set("bootmode", "lpm");
 	}
@@ -427,23 +419,23 @@ int exynos_late_init(void)
 	switch (mode) {
 	case MODE_FASTBOOT:
 		printf("Activating fastboot mode\n");
-		i9300_led_action(LED_BLUE, LEDST_ON);
+		midas_led_action(LED_BLUE, LEDST_ON);
 		env_set("bootcmd", "run fastboot");
 		break;
 	case MODE_RECOVERY:
 		printf("Booting to recovery\n");
-		i9300_led_action(LED_RED, LEDST_ON);
+		midas_led_action(LED_RED, LEDST_ON);
 		env_set("bootcmd", "run recoveryboot");
 		env_set("bootmode", "recovery");
 		break;
 	case MODE_CONSOLE:
 		printf("Dropping into u-boot console\n");
-		i9300_led_action(LED_GREEN, LEDST_ON);
+		midas_led_action(LED_GREEN, LEDST_ON);
 		env_set("bootcmd", NULL);
 		break;
 	default:
 		printf("Booting normally...\n");
-		i9300_led_action(LED_GREEN | LED_RED, LEDST_ON);
+		midas_led_action(LED_GREEN | LED_RED, LEDST_ON);
 		env_set("bootcmd", "run autoboot");
 
 	}

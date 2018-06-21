@@ -35,7 +35,7 @@ echo "Exynos4412 FWBL1 fusing"
 dd if=./p4412_s_fwbl1.bin of=$1 bs=$block_size seek=$fwbl1_pos
 ####################################
 echo "Exynos4412 BL2 fusing"
-dd if=spl/i9300-spl.bin of=$1 bs=$block_size seek=$bl2_pos
+dd if=spl/midas-spl.bin of=$1 bs=$block_size seek=$bl2_pos
 ####################################
 echo "Exynos4412 bootloader fusing"
 dd if=./u-boot.bin of=$1 bs=$block_size seek=$uboot_pos

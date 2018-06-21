@@ -7,7 +7,7 @@
 #define LED_GREEN (1 << GREEN)
 #define LED_BLUE (1 << BLUE)
 
-int i9300_led_action(int mask, enum led_state_t state);
+int midas_led_action(int mask, enum led_state_t state);
 
 #define INFORM_MAGIC 0x12345670
 enum boot_mode {
