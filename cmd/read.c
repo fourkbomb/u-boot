@@ -17,6 +17,7 @@ int do_read(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 	char *ep;
 	struct blk_desc *dev_desc = NULL;
 	int dev;
+	int addr_index = argc == 6 ? 3 : 4;
 	int part = 0;
 	disk_partition_t part_info;
 	ulong offset = 0u;
@@ -25,14 +26,14 @@ int do_read(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 	uint blk;
 	uint cnt;
 
-	if (argc != 6) {
+	if (argc != 6 && argc != 7) {
 		cmd_usage(cmdtp);
 		return 1;
 	}
 
 	dev = (int)simple_strtoul(argv[2], &ep, 16);
 	if (*ep) {
-		if (*ep != ':') {
+		if (argc == 7 || *ep != ':') {
 			printf("Invalid block device %s\n", argv[2]);
 			return 1;
 		}
@@ -45,10 +46,16 @@ int do_read(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 		return 1;
 	}
 
-	addr = (void *)simple_strtoul(argv[3], NULL, 16);
-	blk = simple_strtoul(argv[4], NULL, 16);
-	cnt = simple_strtoul(argv[5], NULL, 16);
+	if (argc == 7) {
+		part = part_get_info_by_name(dev_desc, argv[3], &part_info);
+		if (part < 1) {
+			printf("Partition %s not found\n", argv[3]);
+			return 1;
+		}
+	}
 
+	addr = (void *)simple_strtoul(argv[addr_index], NULL, 16);
+	blk = simple_strtoul(argv[addr_index+1], NULL, 16);
 	if (part != 0) {
 		if (part_get_info(dev_desc, part, &part_info)) {
 			printf("Cannot find partition %d\n", part);
@@ -60,6 +67,11 @@ int do_read(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 		/* Largest address not available in struct blk_desc. */
 		limit = ~0;
 	}
+
+	if (!strcmp("end", argv[addr_index+2]))
+		cnt = limit - blk;
+	else
+		cnt = simple_strtoul(argv[addr_index+2], NULL, 16);
 
 	if (cnt + blk > limit) {
 		printf("Read out of range\n");
@@ -75,7 +87,8 @@ int do_read(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 }
 
 U_BOOT_CMD(
-	read,	6,	0,	do_read,
+	read,	7,	0,	do_read,
 	"Load binary data from a partition",
-	"<interface> <dev[:part]> addr blk# cnt"
+	"<interface> <dev[:part]> addr blk# cnt\n"
+	"read <interface> <dev> <partlabel> addr blk# cnt - use 'end' in place of cnt to read the whole partition"
 );
