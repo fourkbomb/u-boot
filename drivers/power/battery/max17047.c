@@ -245,7 +245,7 @@ do_write:
 	max17047_write_and_verify(dev, MAX17047_STATUS, status);
 
 	/* Totally arbitrary wait - make sure SoC is updated */
-	mdelay(1000);
+	mdelay(350);
 	debug("%s: POR completed successfully. SOC: %d\n", __func__, max17047_get_soc(dev));
 	return 0;
 }
