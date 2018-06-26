@@ -160,7 +160,7 @@ static int midas_check_battery(void)
 		return ret;
 	}
 
-	printf("Need charging: current charge level %d%, will charge at %d uA\n", battery_get_soc(bat), current);
+	printf("Need charging: current charge level %d%%, will charge at %d uA\n", battery_get_soc(bat), current);
 	for (int i = 0; i < 50; i++) {
 		midas_led_action(LED_RED | LED_GREEN | LED_BLUE, LEDST_TOGGLE);
 		mdelay(500);
