@@ -104,7 +104,7 @@ static int max77693_get_status(struct udevice *dev)
 
 static int max77693_probe(struct udevice *dev)
 {
-	int ret = device_get_supply_regulator(dev, "charger-supply", &dev->priv);
+	int ret = device_get_supply_regulator(dev, "charger-supply", (struct udevice **)&dev->priv);
 	if (ret) {
 		printf("Failed to get charger regulator: %d\n", ret);
 		return ret;
