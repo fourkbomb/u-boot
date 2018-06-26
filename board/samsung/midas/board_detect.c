@@ -15,6 +15,8 @@
 #define GPY1_DAT 0x11000144
 #define GPY2_DAT 0x11000164
 
+extern void sdelay(unsigned long);
+
 enum board {
 	BOARD_UNKNOWN = 0,
 	BOARD_I9300 = 1,
@@ -25,14 +27,6 @@ enum board {
 };
 
 static enum board cur_board = BOARD_MAX;
-
-static const char *board_compat[BOARD_MAX] = {
-	[BOARD_UNKNOWN] = "samsung,midas",
-	[BOARD_I9300] = "samsung,i9300",
-	[BOARD_I9305] = "samsung,i9305",
-	[BOARD_N7100] = "samsung,n7100",
-	[BOARD_N7105] = "samsung,n7105",
-};
 
 static const char *board_fit_name[BOARD_MAX] = {
 	[BOARD_UNKNOWN] = "exynos4412-midas",
