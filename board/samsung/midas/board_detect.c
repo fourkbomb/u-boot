@@ -4,6 +4,17 @@
 #include <dm/uclass.h>
 #include <i2c.h>
 
+/*
+ * This code is run very early in U-Boot proper.
+ * The DM GPIO stuff hasn't been initialised yet, so while
+ * the gpio_cfg_pin/gpio_set_pull functions work (as they
+ * are implemented directly by s5p_gpio), gpio_get_value
+ * doesn't. So we need to use readl() instead.
+ */
+#define GPA0_DAT 0x11400004
+#define GPY1_DAT 0x11000144
+#define GPY2_DAT 0x11000164
+
 enum board {
 	BOARD_UNKNOWN = 0,
 	BOARD_I9300 = 1,
@@ -44,9 +55,9 @@ static bool is_i9305(void)
 		gpio_cfg_pin(pin, S5P_GPIO_INPUT);
 		gpio_set_pull(pin, S5P_GPIO_PULL_DOWN);
 	}
-
-	if (gpio_get_value(EXYNOS4X12_GPIO_Y10) &&
-			gpio_get_value(EXYNOS4X12_GPIO_Y11))
+	/* TRM says it takes 800 APB clocks for change to take effect */
+	sdelay(0x8000);
+	if ((readl(GPY1_DAT) & (BIT(0) | BIT(1))) == (BIT(0) | BIT(1)))
 		ret = true;
 
 	/* put everything back to reset value */
@@ -69,8 +80,9 @@ static bool is_i9300(void)
 
 	gpio_cfg_pin(EXYNOS4X12_GPIO_Y23, S5P_GPIO_INPUT);
 	gpio_set_pull(EXYNOS4X12_GPIO_Y23, S5P_GPIO_PULL_DOWN);
-
-	if (gpio_get_value(EXYNOS4X12_GPIO_Y23))
+	/* TRM says it takes 800 APB clocks for change to take effect */
+	sdelay(0x8000);
+	if ((readl(GPY2_DAT) & BIT(3)) == BIT(3))
 		ret = true;
 
 	gpio_set_pull(EXYNOS4X12_GPIO_Y23, S5P_GPIO_PULL_UP);
@@ -92,8 +104,10 @@ static bool is_n7100(void)
 		gpio_set_pull(pin, S5P_GPIO_PULL_DOWN);
 	}
 
-	if (!gpio_get_value(EXYNOS4X12_GPIO_A06) &&
-			!gpio_get_value(EXYNOS4X12_GPIO_A07))
+	/* TRM says it takes 800 APB clocks for change to take effect */
+	sdelay(0x8000);
+
+	if ((readl(GPA0_DAT) & (BIT(6) | BIT(7))) == 0)
 		ret = true;
 
 	for (int pin = EXYNOS4X12_GPIO_A06; pin <= EXYNOS4X12_GPIO_A07; pin++) {
@@ -113,6 +127,7 @@ enum board guess_board(void) {
 	bool i9305 = is_i9305();
 	bool n7100 = is_n7100();
 
+	printf("%s: i9300-%d i9305-%d n7100-%d\n", __func__, i9300, i9305, n7100);
 	if (i9300) {
 		return BOARD_I9300;
 	} else if (i9305) {
