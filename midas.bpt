@@ -1,0 +1,81 @@
+{
+    "settings": {
+        "disk_size": "15753805312"
+    },
+    "partitions": [
+        {
+            "label": "env",
+            "size": "64 KiB",
+            "position": -10
+        },
+        {
+            "label": "bootloader",
+            "size": "2 MiB",
+            "type_guid": "brillo_bootloader",
+            "position": -9
+        },
+        {
+            "label": "misc",
+            "size": "2 MiB",
+            "type_guid": "brillo_misc",
+            "position": -8
+        },
+        {
+            "label": "padding",
+            "size": "8302080",
+            "position": -7
+        },
+        {
+            "label": "efs",
+            "size": "20 MiB",
+            "position": -6
+        },
+        {
+            "label": "m9kefs1",
+            "size": "4 MiB",
+            "position": -5
+        },
+        {
+            "label": "m9kefs2",
+            "size": "4 MiB",
+            "position": -4
+        },
+        {
+            "label": "m9kefs3",
+            "size": "4 MiB",
+            "position": -3
+        },
+        {
+            "label": "boot",
+            "size": "24 MiB",
+            "type_guid": "brillo_boot",
+            "position": -2
+        },
+        {
+            "label": "radio",
+            "size": "88 MiB",
+            "position": -1
+        },
+        {
+            "label": "recovery",
+            "size": "24 MiB"
+        },
+        {
+            "label": "system",
+            "size": "1 GiB",
+            "type_guid": "brillo_system"
+        },
+        {
+            "label": "vendor",
+            "size": "1 GiB"
+        },
+        {
+            "label": "userdata",
+            "size": "1 GiB",
+            "grow": true,
+            "type_guid": "brillo_userdata"
+        }
+    ]
+}
+
+
