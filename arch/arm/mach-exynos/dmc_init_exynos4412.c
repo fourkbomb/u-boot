@@ -24,10 +24,24 @@ static void tzasc_init(void) {
 	}
 }
 
+static int board_num_mem_chips(void)
+{
+	u32 pkgid = readl(EXYNOS4_PRO_ID + 4);
+	/* 2GB of RAM */
+	if ((pkgid & 0x30) == 0x10)
+		return 2;
+	return 1;
+}
+
 void mem_ctrl_init(int reset)
 {
 	struct exynos4_dmc *dmc = (struct exynos4_dmc *)samsung_get_base_dmc_ctrl();
 	struct exynos4_dmc *dmc1 = (struct exynos4_dmc *)(samsung_get_base_dmc_ctrl() + DMC_OFFSET);
+	int chips = board_num_mem_chips();
+	u32 memcontrol = DMC_MEMCONTROL;
+
+	if (chips == 2)
+		memcontrol |= MEM_2CHIPS;
 
 	writel(0xe3855403, &dmc->phyzqcontrol);
 	writel(0x71101008, &dmc->phycontrol0);
@@ -41,8 +55,10 @@ void mem_ctrl_init(int reset)
 	writel(0x00000084, &dmc->phycontrol1);
 
 	writel(0x0fff30ca, &dmc->concontrol);
-	writel(0x00202500, &dmc->memcontrol);
+	writel(memcontrol, &dmc->memcontrol);
 	writel(0x40c01323, &dmc->memconfig0);
+	if (chips == 2)
+		writel(0x80c01323, &dmc->memconfig1);
 	writel(0x80000000 | 0x7, &dmc->ivcontrol);
 	writel(0x64000000, &dmc->prechconfig);
 	writel(0x9c4000ff, &dmc->phycontrol0);
@@ -71,6 +87,20 @@ void mem_ctrl_init(int reset)
 	writel(0x810, &dmc->directcmd);
 	writel(0xc08, &dmc->directcmd);
 
+	if (chips == 2) {
+		sdelay(0x100000);
+
+		writel(0x07100000, &dmc->directcmd);
+		sdelay(0x100000);
+		writel(0x00171c00, &dmc->directcmd);
+		sdelay(0x100000);
+		writel(0x110bfc, &dmc->directcmd);
+		sdelay(0x100000);
+		writel(0x100608, &dmc->directcmd);
+		writel(0x100810, &dmc->directcmd);
+		writel(0x100c08, &dmc->directcmd);
+	}
+
 	writel(0xe3855403, &dmc1->phyzqcontrol);
 	writel(0x71101008, &dmc1->phycontrol0);
 	writel(0x7110100a, &dmc1->phycontrol0);
@@ -83,8 +113,11 @@ void mem_ctrl_init(int reset)
 	writel(0x00000084, &dmc1->phycontrol1);
 
 	writel(0x0fff30ca, &dmc1->concontrol);
-	writel(0x00202500, &dmc1->memcontrol);
+	writel(memcontrol, &dmc1->memcontrol);
 	writel(0x40c01323, &dmc1->memconfig0);
+	if (chips == 2)
+		writel(0x80c01323, &dmc1->memconfig1);
+
 	writel(0x80000000 | 0x7, &dmc1->ivcontrol);
 	writel(0x64000000, &dmc1->prechconfig);
 	writel(0x9c4000ff, &dmc1->phycontrol0);
@@ -113,6 +146,22 @@ void mem_ctrl_init(int reset)
 	writel(0x810, &dmc1->directcmd);
 	writel(0xc08, &dmc1->directcmd);
 
+	if (chips == 2) {
+		sdelay(0x100000);
+
+		writel(0x07100000, &dmc1->directcmd);
+		sdelay(0x100000);
+		writel(0x00171c00, &dmc1->directcmd);
+		sdelay(0x100000);
+		writel(0x110bfc, &dmc1->directcmd);
+		sdelay(0x100000);
+		writel(0x100608, &dmc1->directcmd);
+		writel(0x100810, &dmc1->directcmd);
+		writel(0x100c08, &dmc1->directcmd);
+
+	}
+
+
 	writel(PHYCONTROL0_VAL, &dmc->phycontrol0);
 	writel(MEM_TERM_EN | PHY_READ_EN | CTRL_SHGATE | CTRL_REF(8) | CTRL_SHIFTC(4), &dmc->phycontrol1);
 	writel(PHYCONTROL0_VAL | CTRL_DLL_START, &dmc->phycontrol0);
@@ -136,8 +185,8 @@ void mem_ctrl_init(int reset)
 	writel(DMC_CONCONTROL, &dmc->concontrol);
 	writel(DMC_CONCONTROL, &dmc1->concontrol);
 
-	writel(DMC_MEMCONTROL, &dmc->memcontrol);
-	writel(DMC_MEMCONTROL, &dmc1->memcontrol);
+	writel(memcontrol, &dmc->memcontrol);
+	writel(memcontrol, &dmc1->memcontrol);
 
 	tzasc_init();
 

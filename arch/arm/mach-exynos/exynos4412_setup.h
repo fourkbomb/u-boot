@@ -479,6 +479,7 @@
 /* DMC MEMCONTROL */
 #define BURSTLEN	(0x2 << 20)
 #define MEM_WIDTH	(0x2 << 12)
+#define MEM_2CHIPS	(0x1 << 16)
 #define MEM_TYPE	(0x5 << 8) /* LPDDR2-S4 */
 #define DSREF_EN	(0x1 << 5)
 #define TP_EN		(0x1 << 4)
