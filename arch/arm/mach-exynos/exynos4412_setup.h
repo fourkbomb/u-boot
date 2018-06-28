@@ -301,30 +301,61 @@ static inline int exynos4412_get_rev(void)
 				| FIMD0_SEL(0x6))
 
 /* DMC PHYCONTROL0 */
-#define CTRL_FORCE	(0x7f << 24)
-#define CTRL_INC	(0x10 << 16)
-#define CTRL_START_POINT (0x10 << 8)
-#define DQS_DELAY	(0x0 << 4)
+#define CTRL_FORCE(x)	((x) << 24)
+#define CTRL_INC(x)	((x) << 16)
+#define CTRL_START_POINT(x) ((x) << 8)
+#define DQS_DELAY(x)	((x) << 4)
 #define CTRL_DFDQS	(0x1 << 3)
-#define CTRL_HALF	(0x0 << 2)
+#define CTRL_HALF	(0x1 << 2)
 #define CTRL_DLL_ON	(0x1 << 1)
 #define CTRL_DLL_START (0x1 << 0)
 
 /* CTRL_DLL_START will be ORd in when appropriate */
-#define PHYCONTROL0_VAL (CTRL_FORCE | CTRL_INC \
-			| CTRL_START_POINT | DQS_DELAY \
-			| CTRL_DFDQS | CTRL_HALF | CTRL_DLL_ON)
+#define PHYCONTROL0_VAL_INIT (CTRL_FORCE(0x71) | CTRL_INC(0x10) \
+			| CTRL_START_POINT(0x10) \
+			| CTRL_DFDQS)
+#define PHYCONTROL0_VAL_STAGE2 (CTRL_FORCE(0x9c) | CTRL_INC(0x40) \
+			| DQS_DELAY(0xf) | CTRL_DFDQS | CTRL_HALF \
+			| CTRL_DLL_ON | CTRL_DLL_START)
+#define PHYCONTROL0_VAL (CTRL_FORCE(0x7f) | CTRL_INC(0x10) \
+			| CTRL_START_POINT(0x10) \
+			| CTRL_DFDQS | CTRL_DLL_ON)
 
 /* DMC PHYCONTROL1 */
 #define MEM_TERM_EN (0x1 << 31)
 #define PHY_READ_EN (0x1 << 30)
 #define CTRL_SHGATE (0x1 << 29)
-#define FP_RESYNC	(0x1 << 3)
 #define CTRL_REF(x)	(x << 4)
+#define FP_RESYNC	(0x1 << 3)
 #define CTRL_SHIFTC(x) (x << 0)
 
-#define DMC_PHYCONTROL1 (MEM_TERM_EN | PHY_READ_EN \
-			| CTRL_SHGATE | CTRL_REF | CTRL_SHIFTC)
+#define PHYCONTROL1_VAL (CTRL_REF(8) | CTRL_SHIFTC(4))
+
+/* DMC TIMINGREF */
+#define T_REFI(x)	((x) << 0)
+
+/* DMC TIMINGROW */
+#define T_RFC(x)	((x) << 24)
+#define T_RRD(x)	((x) << 20)
+#define T_RP(x)		((x) << 16)
+#define T_RCD(x)	((x) << 12)
+#define T_RC(x)		((x) << 6)
+#define T_RAS(x)	((x) << 0)
+
+/* DMC TIMINGDATA */
+#define T_WTR(x)	((x) << 28)
+#define T_WR(x)		((x) << 24)
+#define T_RTP(x)	((x) << 20)
+#define CL(x)		((x) << 16)
+#define WL(x)		((x) << 8)
+#define RL(x)		((x) << 0)
+
+/* DMC TIMINGPOWER */
+#define T_FAW(x)	((x) << 26)
+#define T_XSR(x)	((x) << 16)
+#define T_XP(x)		((x) << 8)
+#define T_CKE(x)	((x) << 4)
+#define T_MRD(x)	((x) << 0)
 
 /* DMC CONCONTROL */
 #define TIMEOUT_LEVEL0	(0xfff << 16)
@@ -334,6 +365,9 @@ static inline int exynos4412_get_rev(void)
 #define PDN_DQ_DISABLE	(0x1 << 4)
 #define IO_PDN_CON		(0x1 << 3)
 #define CLK_RATIO		(0x1 << 1)
+
+#define DMC_CONCONTROL_INIT	(TIMEOUT_LEVEL0 | RD_FETCH \
+				| DRV_TYPE | IO_PDN_CON | CLK_RATIO)
 
 #define DMC_CONCONTROL	(TIMEOUT_LEVEL0 | RD_FETCH \
 			| DRV_TYPE | AREF_EN \
@@ -352,5 +386,43 @@ static inline int exynos4412_get_rev(void)
 
 #define DMC_MEMCONTROL (BURSTLEN | MEM_WIDTH | MEM_TYPE)
 
+/* DMC MEMCONFIG0 */
+#define CHIP_BASE(x)	((x) << 24)
+#define CHIP_MASK	(0xc0 << 16)
+#define CHIP_MAP	(0x1 << 12)
+#define CHIP_COL	(0x3 << 8)
+#define CHIP_ROW	(0x2 << 4)
+#define CHIP_BANK	(0x3 << 0)
+
+#define DMC_MEMCONFIG0 (CHIP_MASK | CHIP_MAP | CHIP_COL | CHIP_ROW | CHIP_BANK)
+
+/* DMC DIRECTCMD */
+#define CMD_TYPE(x)	((x) << 24)
+#define CMD_CHIP(x)	((x) << 20)
+#define CMD_BANK(x)	((x) << 16)
+#define CMD_ADDR(x)	((x) << 0)
+
+/* DMC_PHYZQCONTROL */
+#define CTRL_DCC	(0xe38 << 20)
+#define CTRL_ZQ_FORCE_IMPP (0x2 << 17)
+#define CTRL_ZQ_FORCE_IMPN (0x5 << 14)
+#define CTRL_ZQ_MODE_TERM (0x2 << 11)
+#define CTRL_ZQ_MODE_DDS_1GB (0x4 << 8)
+#define CTRL_ZQ_MODE_DDS_2GB (0x5 << 8)
+#define CTRL_ZQ_DIV (0 << 4)
+#define CTRL_ZQ_FORCE (0 << 2)
+#define CTRL_ZQ_START (1 << 1)
+#define CTRL_ZQ_MODE_NOTTERM (1 << 0)
+
+#define DMC_PHYZQCONTROL	(CTRL_DCC | CTRL_ZQ_FORCE_IMPP \
+				| CTRL_ZQ_FORCE_IMPN | CTRL_ZQ_MODE_TERM \
+				| CTRL_ZQ_DIV | CTRL_ZQ_FORCE | CTRL_ZQ_START \
+				| CTRL_ZQ_MODE_NOTTERM);
+
+/* DMC IVCONTROL */
+#define IV_ON	(0x1 << 31)
+#define IV_SIZE_128B	(0x7 << 0)
+
+#define DMC_IVCONTROL	(IV_ON | IV_SIZE_128B)
 #endif
 
