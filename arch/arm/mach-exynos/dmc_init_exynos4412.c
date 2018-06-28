@@ -33,17 +33,35 @@ static int board_num_mem_chips(void)
 	return 1;
 }
 
+static void set_prime_stopctrl(void)
+{
+	struct exynos4x12_clock *clk = (struct exynos4x12_clock *)samsung_get_base_clock();
+
+	/* PRE_WAIT_CNT, POST_WAIT_CNT = 0x1 */
+	writel(0x101, &clk->atclk_stopctrl);
+}
+
 void mem_ctrl_init(int reset)
 {
 	struct exynos4_dmc *dmc = (struct exynos4_dmc *)samsung_get_base_dmc_ctrl();
 	struct exynos4_dmc *dmc1 = (struct exynos4_dmc *)(samsung_get_base_dmc_ctrl() + DMC_OFFSET);
 	int chips = board_num_mem_chips();
+	int rev = exynos4412_get_rev();
 	u32 memcontrol = DMC_MEMCONTROL;
+	u32 prechconfig = 0x64000000;
 
-	if (chips == 2)
+	if (rev == EXYNOS4412_REV_ZERO)
+		prechconfig |= 0xffff;
+	else if (rev == EXYNOS4412_REV_PRIME)
+		set_prime_stopctrl();
+
+	if (chips == 2) {
 		memcontrol |= MEM_2CHIPS;
+		writel(0xe3855503, &dmc->phyzqcontrol);
+	} else {
+		writel(0xe3855403, &dmc->phyzqcontrol);
+	}
 
-	writel(0xe3855403, &dmc->phyzqcontrol);
 	writel(0x71101008, &dmc->phycontrol0);
 	writel(0x7110100a, &dmc->phycontrol0);
 
@@ -60,14 +78,23 @@ void mem_ctrl_init(int reset)
 	if (chips == 2)
 		writel(0x80c01323, &dmc->memconfig1);
 	writel(0x80000000 | 0x7, &dmc->ivcontrol);
-	writel(0x64000000, &dmc->prechconfig);
+	writel(prechconfig, &dmc->prechconfig);
 	writel(0x9c4000ff, &dmc->phycontrol0);
 
 	writel(0x5d, &dmc->timingref);
 
-	writel(0x34498691, &dmc->timingrow);
-	writel(0x36330306, &dmc->timingdata);
-	writel(0x50380365, &dmc->timingpower);
+	if (rev == EXYNOS4412_REV_PRIME) {
+		writel(0x3a5a8713, &dmc->timingrow);
+		writel(0x47400306, &dmc->timingdata);
+		writel(0x583e0475, &dmc->timingpower);
+	} else {
+		if (rev == EXYNOS4412_REV_ZERO)
+			writel(0x34a98691, &dmc->timingrow);
+		else
+			writel(0x34498691, &dmc->timingrow);
+		writel(0x36330306, &dmc->timingdata);
+		writel(0x50380365, &dmc->timingpower);
+	}
 
 	sdelay(0x100000);
 
@@ -101,7 +128,11 @@ void mem_ctrl_init(int reset)
 		writel(0x100c08, &dmc->directcmd);
 	}
 
-	writel(0xe3855403, &dmc1->phyzqcontrol);
+	if (chips == 2) {
+		writel(0xe3855503, &dmc1->phyzqcontrol);
+	} else
+		writel(0xe3855403, &dmc1->phyzqcontrol);
+
 	writel(0x71101008, &dmc1->phycontrol0);
 	writel(0x7110100a, &dmc1->phycontrol0);
 
@@ -119,14 +150,23 @@ void mem_ctrl_init(int reset)
 		writel(0x80c01323, &dmc1->memconfig1);
 
 	writel(0x80000000 | 0x7, &dmc1->ivcontrol);
-	writel(0x64000000, &dmc1->prechconfig);
+	writel(prechconfig, &dmc1->prechconfig);
 	writel(0x9c4000ff, &dmc1->phycontrol0);
 
 	writel(0x5d, &dmc1->timingref);
 
-	writel(0x34498691, &dmc1->timingrow);
-	writel(0x36330306, &dmc1->timingdata);
-	writel(0x50380365, &dmc1->timingpower);
+	if (rev == EXYNOS4412_REV_PRIME) {
+		writel(0x3a5a8713, &dmc1->timingrow);
+		writel(0x47400306, &dmc1->timingdata);
+		writel(0x583e0475, &dmc1->timingpower);
+	} else {
+		if (rev == EXYNOS4412_REV_ZERO)
+			writel(0x34a98691, &dmc1->timingrow);
+		else
+			writel(0x34498691, &dmc1->timingrow);
+		writel(0x36330306, &dmc1->timingdata);
+		writel(0x50380365, &dmc1->timingpower);
+	}
 
 	sdelay(0x100000);
 
@@ -167,8 +207,8 @@ void mem_ctrl_init(int reset)
 	writel(PHYCONTROL0_VAL | CTRL_DLL_START, &dmc->phycontrol0);
 	sdelay(0x20000);
 
-	writel(CTRL_REF(8) | CTRL_SHIFTC(4), &dmc->phycontrol1);
 	writel(CTRL_REF(8) | FP_RESYNC | CTRL_SHIFTC(4), &dmc->phycontrol1);
+	writel(CTRL_REF(8) | CTRL_SHIFTC(4), &dmc->phycontrol1);
 
 	sdelay(0x20000);
 
@@ -177,14 +217,15 @@ void mem_ctrl_init(int reset)
 	writel(PHYCONTROL0_VAL | CTRL_DLL_START, &dmc1->phycontrol0);
 	sdelay(0x20000);
 
-	writel(CTRL_REF(8) | CTRL_SHIFTC(4), &dmc1->phycontrol1);
 	writel(CTRL_REF(8) | FP_RESYNC | CTRL_SHIFTC(4), &dmc1->phycontrol1);
+	writel(CTRL_REF(8) | CTRL_SHIFTC(4), &dmc1->phycontrol1);
 
 	sdelay(0x20000);
 
 	writel(DMC_CONCONTROL, &dmc->concontrol);
 	writel(DMC_CONCONTROL, &dmc1->concontrol);
 
+	memcontrol |= DSREF_EN | TP_EN | DPWRDN_EN | CLK_STOP_EN;
 	writel(memcontrol, &dmc->memcontrol);
 	writel(memcontrol, &dmc1->memcontrol);
 
