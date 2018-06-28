@@ -18,6 +18,17 @@
 
 #include <asm/arch/cpu.h>
 
+#define EXYNOS4412_REV_ZERO 0x00
+#define EXYNOS4412_REV_MAIN 0x10
+#define EXYNOS4412_REV_PRIME 0x20
+#define EXYNOS4412_REV_MASK 0xf0
+
+static inline int exynos4412_get_rev(void)
+{
+	return readl(EXYNOS4_PRO_ID) & EXYNOS4412_REV_MASK;
+}
+
+
 /* ARM_CLOCK_800Mhz */
 #if 1//defined(CONFIG_CLK_ARM_800_APLL_800
 #define APLL_MDIV	0x64
@@ -486,10 +497,7 @@
 #define DPWRDN_EN	(0x1 << 1)
 #define CLK_STOP_EN (0x1 << 0)
 
-#define DMC_MEMCONTROL (BURSTLEN | MEM_WIDTH \
-						| MEM_TYPE | DSREF_EN \
-						| TP_EN | DPWRDN_EN \
-						| CLK_STOP_EN)
+#define DMC_MEMCONTROL (BURSTLEN | MEM_WIDTH | MEM_TYPE)
 
 #endif
 
