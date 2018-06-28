@@ -32,11 +32,21 @@
 #include "common_setup.h"
 #include "exynos4412_setup.h"
 
+static void reset_isp(void)
+{
+	struct exynos4412_power *pwr =
+		(struct exynos4412_power *)samsung_get_base_power();
+
+	writel(0, &pwr->cmu_reset_isp_sys_pwr_reg);
+	writel(0, &pwr->cmu_sysclk_isp_sys_pwr_reg);
+}
+
 void system_clock_init(void)
 {
 	struct exynos4x12_clock *clk =
 		(struct exynos4x12_clock *)samsung_get_base_clock();
 
+	reset_isp();
 	/* Set up UART */
 
 	writel(0, &clk->src_cpu);
