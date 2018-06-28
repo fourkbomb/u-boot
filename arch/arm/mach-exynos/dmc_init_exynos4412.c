@@ -41,14 +41,26 @@ static void set_prime_stopctrl(void)
 	writel(0x101, &clk->atclk_stopctrl);
 }
 
+static void do_directcmd(struct exynos4_dmc *dmc, u32 cmd, int chip, u32 delay)
+{
+	if (delay)
+		sdelay(delay);
+	if (chip)
+		cmd |= CMD_CHIP(1);
+
+	writel(cmd, &dmc->directcmd);
+}
+
 void mem_ctrl_init(int reset)
 {
-	struct exynos4_dmc *dmc = (struct exynos4_dmc *)samsung_get_base_dmc_ctrl();
-	struct exynos4_dmc *dmc1 = (struct exynos4_dmc *)(samsung_get_base_dmc_ctrl() + DMC_OFFSET);
+	struct exynos4_dmc *dmcs[2];
+	dmcs[0] = (struct exynos4_dmc *)samsung_get_base_dmc_ctrl();
+	dmcs[1] = (struct exynos4_dmc *)(samsung_get_base_dmc_ctrl() + DMC_OFFSET);
 	int chips = board_num_mem_chips();
 	int rev = exynos4412_get_rev();
 	u32 memcontrol = DMC_MEMCONTROL;
 	u32 prechconfig = 0x64000000;
+	u32 zqcontrol = DMC_PHYZQCONTROL;
 
 	if (rev == EXYNOS4412_REV_ZERO)
 		prechconfig |= 0xffff;
@@ -57,177 +69,94 @@ void mem_ctrl_init(int reset)
 
 	if (chips == 2) {
 		memcontrol |= MEM_2CHIPS;
-		writel(0xe3855503, &dmc->phyzqcontrol);
+		zqcontrol |= CTRL_ZQ_MODE_DDS_2GB;
 	} else {
-		writel(0xe3855403, &dmc->phyzqcontrol);
+		zqcontrol |= CTRL_ZQ_MODE_DDS_1GB;
 	}
 
-	writel(0x71101008, &dmc->phycontrol0);
-	writel(0x7110100a, &dmc->phycontrol0);
+	for (int idx = 0; idx < ARRAY_SIZE(dmcs); idx++) {
+		struct exynos4_dmc *dmc = dmcs[idx];
+		writel(zqcontrol, &dmc->phyzqcontrol);
 
-	writel(0x00000084, &dmc->phycontrol1);
-	writel(0x71101008, &dmc->phycontrol0);
-	writel(0x0000008c, &dmc->phycontrol1);
-	writel(0x00000084, &dmc->phycontrol1);
-	writel(0x0000008c, &dmc->phycontrol1);
-	writel(0x00000084, &dmc->phycontrol1);
+		writel(PHYCONTROL0_VAL_INIT, &dmc->phycontrol0);
+		writel(PHYCONTROL0_VAL_INIT | CTRL_DLL_ON, &dmc->phycontrol0);
 
-	writel(0x0fff30ca, &dmc->concontrol);
-	writel(memcontrol, &dmc->memcontrol);
-	writel(0x40c01323, &dmc->memconfig0);
-	if (chips == 2)
-		writel(0x80c01323, &dmc->memconfig1);
-	writel(0x80000000 | 0x7, &dmc->ivcontrol);
-	writel(prechconfig, &dmc->prechconfig);
-	writel(0x9c4000ff, &dmc->phycontrol0);
+		writel(PHYCONTROL1_VAL, &dmc->phycontrol1);
+		writel(PHYCONTROL0_VAL, &dmc->phycontrol0);
+		writel(PHYCONTROL1_VAL | FP_RESYNC, &dmc->phycontrol1);
+		writel(PHYCONTROL1_VAL, &dmc->phycontrol1);
+		writel(PHYCONTROL1_VAL | FP_RESYNC, &dmc->phycontrol1);
+		writel(PHYCONTROL1_VAL, &dmc->phycontrol1);
 
-	writel(0x5d, &dmc->timingref);
+		writel(DMC_CONCONTROL_INIT, &dmc->concontrol);
+		writel(memcontrol, &dmc->memcontrol);
+		writel(CHIP_BASE(0x40) | DMC_MEMCONFIG0, &dmc->memconfig0);
+		if (chips == 2)
+			writel(CHIP_BASE(0x80) | DMC_MEMCONFIG0, &dmc->memconfig1);
+		writel(DMC_IVCONTROL, &dmc->ivcontrol);
+		writel(prechconfig, &dmc->prechconfig);
+		writel(PHYCONTROL0_VAL_STAGE2, &dmc->phycontrol0);
 
-	if (rev == EXYNOS4412_REV_PRIME) {
-		writel(0x3a5a8713, &dmc->timingrow);
-		writel(0x47400306, &dmc->timingdata);
-		writel(0x583e0475, &dmc->timingpower);
-	} else {
-		if (rev == EXYNOS4412_REV_ZERO)
-			writel(0x34a98691, &dmc->timingrow);
-		else
-			writel(0x34498691, &dmc->timingrow);
-		writel(0x36330306, &dmc->timingdata);
-		writel(0x50380365, &dmc->timingpower);
+		writel(T_REFI(0x5d), &dmc->timingref);
+
+		if (rev == EXYNOS4412_REV_PRIME) {
+			writel(T_RFC(0x3a) | T_RRD(0x5) | T_RP(0xa) | T_RCD(0x8) |
+					T_RC(0x1c) | T_RAS(0x13), &dmc->timingrow);
+			writel(T_WTR(0x4) | T_WR(0x7) | T_RTP(0x4) | CL(0x0) |
+					WL(0x3) | RL(0x6), &dmc->timingdata);
+			writel(T_FAW(0x16) | T_XSR(0x3e) | T_XP(0x4) | T_CKE(0x7) | T_MRD(0x5),
+					&dmc->timingpower);
+		} else {
+			u32 timingrow = T_RFC(0x34) | T_RP(0x9) | T_RCD(0x8) |
+				T_RC(0x1a) | T_RAS(0x11);
+			if (rev == EXYNOS4412_REV_ZERO)
+				timingrow |= T_RRD(0xa);
+			else
+				timingrow |= T_RRD(0x4);
+			writel(timingrow, &dmc->timingrow);
+			writel(T_WTR(0x3) | T_WR(0x6) | T_RTP(0x3) | CL(0x3) |
+					WL(0x3) | RL(0x6), &dmc->timingdata);
+			writel(T_FAW(0x14) | T_XSR(0x38) | T_XP(0x3) | T_CKE(0x6) |
+					T_MRD(0x5), &dmc->timingpower);
+		}
+
+		for (int i = 0; i < chips; i++) {
+			// TODO: reduce delay values
+			do_directcmd(dmc, CMD_TYPE(0x7), i, 0x100000);
+			do_directcmd(dmc, CMD_TYPE(0x0) | CMD_BANK(0x7) | CMD_ADDR(0x1c00), i, 0x100000);
+			do_directcmd(dmc, CMD_TYPE(0x0) | CMD_BANK(0x1) | CMD_ADDR(0xbfc), i, 0x100000);
+			do_directcmd(dmc, CMD_TYPE(0x0) | CMD_BANK(0x0) | CMD_ADDR(0x608), i, 0x100000);
+			do_directcmd(dmc, CMD_TYPE(0x0) | CMD_BANK(0x0) | CMD_ADDR(0x810), i, 0);
+			do_directcmd(dmc, CMD_TYPE(0x0) | CMD_BANK(0x0) | CMD_ADDR(0xc08), i, 0);
+		}
 	}
 
-	sdelay(0x100000);
-
-	writel(0x07000000, &dmc->directcmd);
-
-	sdelay(0x100000);
-
-	writel(0x00071c00, &dmc->directcmd);
-
-	sdelay(0x100000);
-
-	writel(0x00010bfc, &dmc->directcmd);
-
-	sdelay(0x100000);
-
-	writel(0x608, &dmc->directcmd);
-	writel(0x810, &dmc->directcmd);
-	writel(0xc08, &dmc->directcmd);
-
-	if (chips == 2) {
-		sdelay(0x100000);
-
-		writel(0x07100000, &dmc->directcmd);
-		sdelay(0x100000);
-		writel(0x00171c00, &dmc->directcmd);
-		sdelay(0x100000);
-		writel(0x110bfc, &dmc->directcmd);
-		sdelay(0x100000);
-		writel(0x100608, &dmc->directcmd);
-		writel(0x100810, &dmc->directcmd);
-		writel(0x100c08, &dmc->directcmd);
-	}
-
-	if (chips == 2) {
-		writel(0xe3855503, &dmc1->phyzqcontrol);
-	} else
-		writel(0xe3855403, &dmc1->phyzqcontrol);
-
-	writel(0x71101008, &dmc1->phycontrol0);
-	writel(0x7110100a, &dmc1->phycontrol0);
-
-	writel(0x00000084, &dmc1->phycontrol1);
-	writel(0x71101008, &dmc1->phycontrol0);
-	writel(0x0000008c, &dmc1->phycontrol1);
-	writel(0x00000084, &dmc1->phycontrol1);
-	writel(0x0000008c, &dmc1->phycontrol1);
-	writel(0x00000084, &dmc1->phycontrol1);
-
-	writel(0x0fff30ca, &dmc1->concontrol);
-	writel(memcontrol, &dmc1->memcontrol);
-	writel(0x40c01323, &dmc1->memconfig0);
-	if (chips == 2)
-		writel(0x80c01323, &dmc1->memconfig1);
-
-	writel(0x80000000 | 0x7, &dmc1->ivcontrol);
-	writel(prechconfig, &dmc1->prechconfig);
-	writel(0x9c4000ff, &dmc1->phycontrol0);
-
-	writel(0x5d, &dmc1->timingref);
-
-	if (rev == EXYNOS4412_REV_PRIME) {
-		writel(0x3a5a8713, &dmc1->timingrow);
-		writel(0x47400306, &dmc1->timingdata);
-		writel(0x583e0475, &dmc1->timingpower);
-	} else {
-		if (rev == EXYNOS4412_REV_ZERO)
-			writel(0x34a98691, &dmc1->timingrow);
-		else
-			writel(0x34498691, &dmc1->timingrow);
-		writel(0x36330306, &dmc1->timingdata);
-		writel(0x50380365, &dmc1->timingpower);
-	}
-
-	sdelay(0x100000);
-
-	writel(0x07000000, &dmc1->directcmd);
-
-	sdelay(0x100000);
-
-	writel(0x00071c00, &dmc1->directcmd);
-
-	sdelay(0x100000);
-
-	writel(0x00010bfc, &dmc1->directcmd);
-
-	sdelay(0x100000);
-
-	writel(0x608, &dmc1->directcmd);
-	writel(0x810, &dmc1->directcmd);
-	writel(0xc08, &dmc1->directcmd);
-
-	if (chips == 2) {
-		sdelay(0x100000);
-
-		writel(0x07100000, &dmc1->directcmd);
-		sdelay(0x100000);
-		writel(0x00171c00, &dmc1->directcmd);
-		sdelay(0x100000);
-		writel(0x110bfc, &dmc1->directcmd);
-		sdelay(0x100000);
-		writel(0x100608, &dmc1->directcmd);
-		writel(0x100810, &dmc1->directcmd);
-		writel(0x100c08, &dmc1->directcmd);
-
-	}
-
-
-	writel(PHYCONTROL0_VAL, &dmc->phycontrol0);
-	writel(MEM_TERM_EN | PHY_READ_EN | CTRL_SHGATE | CTRL_REF(8) | CTRL_SHIFTC(4), &dmc->phycontrol1);
-	writel(PHYCONTROL0_VAL | CTRL_DLL_START, &dmc->phycontrol0);
+	writel(PHYCONTROL0_VAL, &dmcs[0]->phycontrol0);
+	writel(MEM_TERM_EN | PHY_READ_EN | CTRL_SHGATE | CTRL_REF(8) | CTRL_SHIFTC(4), &dmcs[0]->phycontrol1);
+	writel(PHYCONTROL0_VAL | CTRL_DLL_START, &dmcs[0]->phycontrol0);
 	sdelay(0x20000);
 
-	writel(CTRL_REF(8) | FP_RESYNC | CTRL_SHIFTC(4), &dmc->phycontrol1);
-	writel(CTRL_REF(8) | CTRL_SHIFTC(4), &dmc->phycontrol1);
+	writel(CTRL_REF(8) | FP_RESYNC | CTRL_SHIFTC(4), &dmcs[0]->phycontrol1);
+	writel(CTRL_REF(8) | CTRL_SHIFTC(4), &dmcs[0]->phycontrol1);
 
 	sdelay(0x20000);
 
-	writel(PHYCONTROL0_VAL, &dmc1->phycontrol0);
-	writel(MEM_TERM_EN | PHY_READ_EN | CTRL_SHGATE | CTRL_REF(8) | CTRL_SHIFTC(4), &dmc1->phycontrol1);
-	writel(PHYCONTROL0_VAL | CTRL_DLL_START, &dmc1->phycontrol0);
+	writel(PHYCONTROL0_VAL, &dmcs[1]->phycontrol0);
+	writel(MEM_TERM_EN | PHY_READ_EN | CTRL_SHGATE | CTRL_REF(8) | CTRL_SHIFTC(4), &dmcs[1]->phycontrol1);
+	writel(PHYCONTROL0_VAL | CTRL_DLL_START, &dmcs[1]->phycontrol0);
 	sdelay(0x20000);
 
-	writel(CTRL_REF(8) | FP_RESYNC | CTRL_SHIFTC(4), &dmc1->phycontrol1);
-	writel(CTRL_REF(8) | CTRL_SHIFTC(4), &dmc1->phycontrol1);
+	writel(CTRL_REF(8) | FP_RESYNC | CTRL_SHIFTC(4), &dmcs[1]->phycontrol1);
+	writel(CTRL_REF(8) | CTRL_SHIFTC(4), &dmcs[1]->phycontrol1);
 
 	sdelay(0x20000);
 
-	writel(DMC_CONCONTROL, &dmc->concontrol);
-	writel(DMC_CONCONTROL, &dmc1->concontrol);
+	writel(DMC_CONCONTROL, &dmcs[0]->concontrol);
+	writel(DMC_CONCONTROL, &dmcs[1]->concontrol);
 
 	memcontrol |= DSREF_EN | TP_EN | DPWRDN_EN | CLK_STOP_EN;
-	writel(memcontrol, &dmc->memcontrol);
-	writel(memcontrol, &dmc1->memcontrol);
+	writel(memcontrol, &dmcs[0]->memcontrol);
+	writel(memcontrol, &dmcs[1]->memcontrol);
 
 	tzasc_init();
 
