@@ -47,11 +47,11 @@ void system_clock_init(void)
 		(struct exynos4x12_clock *)samsung_get_base_clock();
 
 	reset_isp();
-	/* Set up UART */
 
-	writel(0, &clk->src_cpu);
-	writel(CLK_SRC_TOP0_VAL, &clk->src_top0);
-	writel(CLK_SRC_TOP1_VAL, &clk->src_top1);
+	/* Switch clocks away from PLLs while we configure them */
+	writel(CLK_SRC_CPU_INIT, &clk->src_cpu);
+	writel(CLK_SRC_TOP0_INIT, &clk->src_top0);
+	writel(CLK_SRC_TOP1_INIT, &clk->src_top1);
 	writel(CLK_SRC_LEFTBUS_VAL, &clk->src_leftbus);
 	writel(CLK_SRC_RIGHTBUS_VAL, &clk->src_rightbus);
 	writel(CLK_SRC_PERIL0_VAL, &clk->src_peril0);
@@ -103,10 +103,10 @@ void system_clock_init(void)
 	sdelay(0x40000);
 
 	/* Now that PLLs are set up, we can set the other clocks to use them... */
-	writel((1 << 24) | (1 << 0), &clk->src_cpu);
-	writel((1 << 16) | (1 << 12), &clk->src_dmc);
-	writel((1 << 8) | (1 << 4), &clk->src_top0);
-	writel((1 << 24) | (1 << 20) | (1 << 16) | (1 << 12), &clk->src_top1);
+	writel(CLK_SRC_CPU_PLLS, &clk->src_cpu);
+	writel(CLK_SRC_DMC_PLLS, &clk->src_dmc);
+	writel(CLK_SRC_TOP0_PLLS, &clk->src_top0);
+	writel(CLK_SRC_TOP1_PLLS, &clk->src_top1);
 
 	sdelay(0x10000);
 
