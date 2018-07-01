@@ -133,6 +133,31 @@ enum board guess_board(void) {
 	return BOARD_N7105;
 }
 
+/*
+ * This is called after relocation (for now),
+ * so it should be fine to use the gpio_* APIs
+ */
+void init_overlays(void)
+{
+	enum board board = guess_board();
+	env_set("fit_config", board_fit_name[board]);
+
+	/* Note 2 has two panels - detect the right one. */
+	if (board == BOARD_N7100 || board == BOARD_N7105) {
+		gpio_request(EXYNOS4X12_GPIO_F10, "OLED_ID");
+		gpio_cfg_pin(EXYNOS4X12_GPIO_F10, S5P_GPIO_INPUT);
+		gpio_set_pull(EXYNOS4X12_GPIO_F10, S5P_GPIO_PULL_DOWN);
+
+		if (gpio_get_value(EXYNOS4X12_GPIO_F10) == 0) {
+			printf("%s: using EA8061\n", __func__);
+			env_set("lcd_overlay", "#note2-ea8061");
+		} else {
+			printf("%s: using S6EVR02\n", __func__);
+			env_set("lcd_overlay", "#note2-s6evr02");
+		}
+	}
+}
+
 #if defined(CONFIG_MULTI_DTB_FIT)
 int board_fit_config_name_match(const char *name)
 {
