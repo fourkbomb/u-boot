@@ -416,6 +416,8 @@ int exynos_late_init(void)
 		env_set("bootmode", "lpm");
 	}
 
+	init_overlays();
+
 	switch (mode) {
 	case MODE_FASTBOOT:
 		printf("Activating fastboot mode\n");
