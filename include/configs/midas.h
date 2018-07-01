@@ -69,17 +69,19 @@
 		"setenv stdout nc;setenv stdin nc\0" \
 	"sd=" /* load kernel from SD card */\
 		"mmc rescan; mmc dev 1; mmc read 0x50000000 0x800 0xa000;" \
-		"bootm 0x50000000;\0" \
+		"run bootimage;\0" \
 	"sdupdate=" /* install updated u-boot from partitioned SD card */ \
 		"mmc dev 1 && mmc read 0x50000000 0xa800 0x1000 && " \
 		"mmc dev 0 1 && mmc write 0x50000000 0x0 0x1000;\0" \
 	"bootsdupdate=" /* install updated u-boot from bootable SD card */ \
 		"mmc dev 1 && mmc read 0x50000000 0x1 0x1000 &&" \
 		"mmc dev 0 1 && mmc write 0x50000000 0x0 0x1000;\0" \
+	"bootimage=" /* Boot loaded image */ \
+		"if test ${fit_config} = \"\"; then; bootm 0x50000000; else; bootm 0x50000000#${fit_config}${lcd_overlay}; fi\0" \
 	"mmcboot=" /* Command to boot OS from eMMC */ \
-		"run setbootargs; read mmc 0 boot 0x50000000 0x0 end && bootm 0x50000000; run fastboot\0" \
+		"run setbootargs; read mmc 0 boot 0x50000000 0x0 end && run bootimage; run fastboot\0" \
 	"mmcrecovery=" /* Command to boot recovery from eMMC */ \
-		"run setbootargs; read mmc 0 recovery 0x50000000 0x0 end && bootm 0x50000000; run fastboot\0" \
+		"run setbootargs; read mmc 0 recovery 0x50000000 0x0 end && run bootimage; run fastboot\0" \
 	"autoboot=run mmcboot\0" /* Run on normal boot */ \
 	"recoveryboot=run mmcrecovery\0" /* Run on recovery keycombo/INFORM3 value */ \
 	"fastboot=fastboot 0; run autoboot\0" /* Run on fastboot keycombo/INFORM3 value */ \
