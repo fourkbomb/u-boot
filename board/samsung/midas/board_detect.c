@@ -150,10 +150,10 @@ void init_overlays(void)
 
 		if (gpio_get_value(EXYNOS4X12_GPIO_F10) == 0) {
 			printf("%s: using EA8061\n", __func__);
-			env_set("lcd_overlay", "#note2-ea8061");
+			env_set("lcd_overlay", "#exynos4412-n710x-ea8061");
 		} else {
 			printf("%s: using S6EVR02\n", __func__);
-			env_set("lcd_overlay", "#note2-s6evr02");
+			env_set("lcd_overlay", "#exynos4412-n710x-s6evr02");
 		}
 	}
 }
