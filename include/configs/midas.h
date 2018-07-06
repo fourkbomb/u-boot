@@ -77,11 +77,11 @@
 		"mmc dev 1 && mmc read 0x50000000 0x1 0x1000 &&" \
 		"mmc dev 0 1 && mmc write 0x50000000 0x0 0x1000;\0" \
 	"bootimage=" /* Boot loaded image */ \
-		"if test ${fit_config} = \"\"; then; bootm 0x50000000; else; bootm 0x50000000#${fit_config}${lcd_overlay}; fi\0" \
+		"run setbootargs; if test ${fit_config} = \"\"; then; bootm 0x50000000; else; bootm 0x50000000#${fit_config}${lcd_overlay}; fi\0" \
 	"mmcboot=" /* Command to boot OS from eMMC */ \
-		"run setbootargs; read mmc 0 boot 0x50000000 0x0 end && run bootimage; run fastboot\0" \
+		"read mmc 0 boot 0x50000000 0x0 end && run bootimage; run fastboot\0" \
 	"mmcrecovery=" /* Command to boot recovery from eMMC */ \
-		"run setbootargs; read mmc 0 recovery 0x50000000 0x0 end && run bootimage; run fastboot\0" \
+		"read mmc 0 recovery 0x50000000 0x0 end && run bootimage; run fastboot\0" \
 	"autoboot=run mmcboot\0" /* Run on normal boot */ \
 	"recoveryboot=run mmcrecovery\0" /* Run on recovery keycombo/INFORM3 value */ \
 	"fastboot=fastboot 0; run autoboot\0" /* Run on fastboot keycombo/INFORM3 value */ \
@@ -93,8 +93,8 @@
 		"run readsb20 && run checksb20 && mmc dev 0 1 && mmc write 0x50000000 0x0 0x1000 && run clearsb20\0" \
 	"mmcupdate=if run dommcupdate; then echo Bootloader upgrade succeeded; else echo Bootloader upgrade failed.; fi\0" \
 	"bootargs=console=ttySAC2,115200\0" \
-	"selinuxmode=permissive\0" \
-	"setbootargs=setenv bootargs ${bootargs} androidboot.mode=${bootmode} androidboot.hardware=midas androidboot.selinux=${selinuxmode} androidboot.revision=${board_rev} androidboot.serialno=${serial#}\0" \
+	"readfitbootargs=fdt addr 0x50000000; fdt get value newargs / cmdline && setenv bootargs ${bootargs} ${newargs}\0" \
+	"setbootargs=run readfitbootargs; setenv bootargs ${bootargs} androidboot.mode=${bootmode} androidboot.revision=${board_rev} androidboot.serialno=${serial#}\0" \
 
 #include <linux/sizes.h>
 
