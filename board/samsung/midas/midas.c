@@ -204,11 +204,15 @@ static int midas_check_battery(void)
 	}
 
 	printf("charging!\n");
-	while (battery_get_status(bat) == BAT_STATE_NEED_CHARGING) {
+	while (charger_get_status(charger) != CHARGE_STATE_DISCHARGING && battery_get_status(bat) == BAT_STATE_NEED_CHARGING) {
 		soc = battery_get_soc(bat);
 		printf("%s: SoC started at %d, now %d\n", __func__, old_soc, soc);
 		midas_led_action(LED_RED, LEDST_TOGGLE);
 		mdelay(500);
+	}
+	if (battery_get_status(bat) == BAT_STATE_NEED_CHARGING) {
+		printf("error: battery too low - charger disconnected");
+		return BATTERY_ABORT;
 	}
 	return BATTERY_LPM;
 }
