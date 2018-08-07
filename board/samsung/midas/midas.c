@@ -188,7 +188,7 @@ static int midas_phy_control(int on)
 {
 	int ret;
 	int type;
-	struct udevice *vuotg;
+	struct udevice *vuotg, *vhsic10, *vhsic18;
 	struct udevice *safeout;
 	struct udevice *extcon;
 	struct udevice *pmic;
@@ -196,6 +196,18 @@ static int midas_phy_control(int on)
 	ret = regulator_get_by_platname("VUOTG_3.0V", &vuotg);
 	if (ret) {
 		pr_err("Failed to get VUOTG_3.0V: %d\n", ret);
+		return -1;
+	}
+
+	ret = regulator_get_by_platname("VHSIC_1.0V", &vhsic10);
+	if (ret) {
+		pr_err("Failed to get VHSIC_1.0V: %d\n", ret);
+		return -1;
+	}
+
+	ret = regulator_get_by_platname("VHSIC_1.8V", &vhsic18);
+	if (ret) {
+		pr_err("Failed to get VHSIC_1.8V: %d\n", ret);
 		return -1;
 	}
 
@@ -236,7 +248,19 @@ static int midas_phy_control(int on)
 	}
 
 	if (on) {
-		ret = regulator_set_mode(vuotg, OPMODE_ON);
+		ret = regulator_set_enable(vhsic10, true);
+		if (ret) {
+			pr_err("Failed to enable VHSIC_1.0V: %d\n", ret);
+			return -1;
+		}
+
+		ret = regulator_set_enable(vhsic18, true);
+		if (ret) {
+			pr_err("Failed to enable VHSIC_1.8V: %d\n", ret);
+			return -1;
+		}
+
+		ret = regulator_set_enable(vuotg, true);
 		if (ret) {
 			pr_err("Failed to set VUOTG_3.0V to ON: %d\n", ret);
 			return -1;
@@ -256,9 +280,21 @@ static int midas_phy_control(int on)
 			return -1;
 		}
 	} else {
-		ret = regulator_set_mode(vuotg, OPMODE_LPM);
+		ret = regulator_set_enable(vuotg, false);
 		if (ret) {
-			pr_err("Failed to set VUOTG_3.0V to LPM: %d\n", ret);
+			pr_err("Failed to disable VUOTG_3.0V: %d\n", ret);
+			return -1;
+		}
+
+		ret = regulator_set_enable(vhsic18, false);
+		if (ret) {
+			pr_err("Failed to disable VHSIC_1.8V: %d\n", ret);
+			return -1;
+		}
+
+		ret = regulator_set_enable(vhsic10, false);
+		if (ret) {
+			pr_err("Failed to disable VHSIC_1.0V: %d\n", ret);
 			return -1;
 		}
 
@@ -271,7 +307,6 @@ static int midas_phy_control(int on)
 		}
 
 	}
-
 
 	return 0;
 }
