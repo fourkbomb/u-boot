@@ -113,6 +113,35 @@ static void board_gpio_init(void)
 	gpio_request(EXYNOS4X12_GPIO_X01, "HOME");
 	gpio_cfg_pin(EXYNOS4X12_GPIO_X01, S5P_GPIO_INPUT);
 	gpio_set_pull(EXYNOS4X12_GPIO_X01, S5P_GPIO_PULL_NONE);
+
+	/* externally pulled up IRQs */
+	gpio_request(EXYNOS4X12_GPIO_X07, "PMIC_IRQ");
+	gpio_cfg_pin(EXYNOS4X12_GPIO_X07, S5P_GPIO_INPUT);
+	gpio_set_pull(EXYNOS4X12_GPIO_X07, S5P_GPIO_PULL_NONE);
+
+	gpio_request(EXYNOS4X12_GPIO_X15, "IF_PMIC_IRQ");
+	gpio_cfg_pin(EXYNOS4X12_GPIO_X15, S5P_GPIO_INPUT);
+	gpio_set_pull(EXYNOS4X12_GPIO_X15, S5P_GPIO_PULL_NONE);
+
+	gpio_request(EXYNOS4X12_GPIO_X23, "FUEL_ALERT");
+	gpio_cfg_pin(EXYNOS4X12_GPIO_X23, S5P_GPIO_INPUT);
+	gpio_set_pull(EXYNOS4X12_GPIO_X23, S5P_GPIO_PULL_NONE);
+
+	gpio_request(EXYNOS4X12_GPIO_X34, "SDHCI2_CD");
+	gpio_cfg_pin(EXYNOS4X12_GPIO_X34, S5P_GPIO_INPUT);
+	gpio_set_pull(EXYNOS4X12_GPIO_X34, S5P_GPIO_PULL_NONE);
+
+	/* GPIOs the vendor kernel assumes have been properly configured */
+	gpio_request(EXYNOS4X12_GPIO_C01, "GPC0-1");
+	gpio_cfg_pin(EXYNOS4X12_GPIO_C01, S5P_GPIO_OUTPUT);
+	gpio_set_pull(EXYNOS4X12_GPIO_C01, S5P_GPIO_PULL_NONE);
+	gpio_set_value(EXYNOS4X12_GPIO_C01, 1);
+
+	gpio_request(EXYNOS4X12_GPIO_F21, "GPF2-1");
+	gpio_cfg_pin(EXYNOS4X12_GPIO_F21, S5P_GPIO_OUTPUT);
+	gpio_set_pull(EXYNOS4X12_GPIO_F21, S5P_GPIO_PULL_NONE);
+	gpio_set_value(EXYNOS4X12_GPIO_F21, 0);
+
 }
 
 static int midas_check_battery(void)
