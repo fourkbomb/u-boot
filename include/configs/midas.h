@@ -95,6 +95,7 @@
 	"bootargs=console=ttySAC2,115200\0" \
 	"readfitbootargs=fdt addr 0x50000000; fdt get value newargs / cmdline && setenv bootargs ${bootargs} ${newargs}\0" \
 	"setbootargs=run readfitbootargs; setenv bootargs ${bootargs} androidboot.mode=${bootmode} androidboot.revision=${board_rev} androidboot.serialno=${serial#}\0" \
+	"machid=eb5\0" \
 
 #include <linux/sizes.h>
 
