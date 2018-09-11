@@ -2423,6 +2423,11 @@ static int _usb_eth_send(struct ether_priv *priv, void *packet, int length)
 
 	debug("%s:...\n", __func__);
 
+	if (!req) {
+		printf("%s: No request!\n", __func__);
+		return -ENODEV;
+	}
+
 	/* new buffer is needed to include RNDIS header */
 	if (rndis_active(dev)) {
 		rndis_pkt = malloc(length +
