@@ -203,9 +203,9 @@ static int decode_sromc(const void *blob, struct fdt_sromc *config)
 }
 #endif
 
+#ifdef CONFIG_SMC911X
 int board_eth_init(bd_t *bis)
 {
-#ifdef CONFIG_SMC911X
 	u32 smc_bw_conf, smc_bc_conf;
 	struct fdt_sromc config;
 	fdt_addr_t base_addr;
@@ -250,9 +250,8 @@ int board_eth_init(bd_t *bis)
 	exynos_pinmux_config(PERIPH_ID_SROMC, config.bank);
 	s5p_config_sromc(config.bank, smc_bw_conf, smc_bc_conf);
 	return smc911x_initialize(0, base_addr);
-#endif
-	return 0;
 }
+#endif
 
 #ifdef CONFIG_DISPLAY_BOARDINFO
 int checkboard(void)
