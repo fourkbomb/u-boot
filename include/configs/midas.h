@@ -62,7 +62,7 @@
 /* Boot off EMMC */
 #define CONFIG_SUPPORT_EMMC_BOOT
 
-#define CONFIG_IPADDR 192.168.4.1
+#define CONFIG_IPADDR 192.168.168.2
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	"nc=" \
