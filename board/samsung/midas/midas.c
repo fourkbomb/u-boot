@@ -458,6 +458,31 @@ static void midas_power_off(void)
 	}
 }
 
+static bool needs_network = false;
+
+int board_eth_init(bd_t *bis)
+{
+	if (!needs_network) {
+		printf("Not using network\n");
+		return 0;
+	}
+
+	printf("Using USB network! (ncip=%s ipaddr=%s ethaddr=%s)\n", env_get("ncip"), env_get("ipaddr"), env_get("ethaddr"));
+	int ret = usb_eth_initialize(bis);
+	if (ret < 0) {
+		printf("Error %d registering USB_ETHER\n", ret);
+		return ret;
+	}
+
+	printf("Enabling usb interface\n");
+	board_usb_init(0, 0);
+
+	env_set("stdin", "serial@13820000,nc");
+	env_set("stdout", "serial@13820000,nc");
+
+	printf("Registered USB_ETHER\n");
+	return ret;
+}
 
 int exynos_init(void)
 {
@@ -499,7 +524,8 @@ int exynos_late_init(void)
 		env_set("bootmode", "recovery");
 		break;
 	case MODE_CONSOLE:
-		printf("Dropping into u-boot console\n");
+		printf("Dropping into u-boot console (networked)\n");
+		needs_network = true;
 		midas_led_action(LED_GREEN, LEDST_ON);
 		env_set("bootcmd", NULL);
 		break;
