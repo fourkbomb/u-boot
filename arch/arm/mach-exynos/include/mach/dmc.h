@@ -419,6 +419,25 @@ struct exynos5420_phy_control {
 	unsigned int phy_con42;
 };
 
+struct exynos4412_tzasc {
+	unsigned char res1[0x100];
+	unsigned int region_setup_low_0;
+	unsigned int region_setup_high_0;
+	unsigned int region_attributes_0;
+	unsigned int res2;
+	unsigned int region_setup_low_1;
+	unsigned int region_setup_high_1;
+	unsigned int region_setup_attributes_1;
+	unsigned int res3;
+	unsigned int region_setup_low_2;
+	unsigned int region_setup_high_2;
+	unsigned int region_setup_attributes_2;
+	unsigned int res4;
+	unsigned int region_setup_low_3;
+	unsigned int region_setup_high_3;
+	unsigned int region_attributes_3;
+};
+
 struct exynos5420_tzasc {
 	unsigned char res1[0xf00];
 	unsigned int membaseconfig0;
