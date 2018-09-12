@@ -72,6 +72,13 @@ config TARGET_ODROID
 	bool "Exynos4412 Odroid board"
 	select EXYNOS4412
 
+config TARGET_MIDAS
+	bool "Exynos4412 midas boards"
+	select SUPPORT_SPL
+	select EXYNOS4412
+	select BOARD_LATE_INIT
+	imply OF_BOARD_SETUP
+
 endchoice
 endif
 
@@ -168,6 +175,7 @@ source "board/samsung/arndale/Kconfig"
 source "board/samsung/smdk5250/Kconfig"
 source "board/samsung/smdk5420/Kconfig"
 source "board/samsung/espresso7420/Kconfig"
+source "board/samsung/midas/Kconfig"
 
 config SPL_LDSCRIPT
 	default "board/samsung/common/exynos-uboot-spl.lds" if ARCH_EXYNOS5 || ARCH_EXYNOS4
