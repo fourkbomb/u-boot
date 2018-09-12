@@ -68,7 +68,10 @@ int do_read(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 		limit = ~0;
 	}
 
-	cnt = simple_strtoul(argv[addr_index+2], NULL, 16);
+	if (!strcmp("end", argv[addr_index+2]))
+		cnt = limit - blk;
+	else
+		cnt = simple_strtoul(argv[addr_index+2], NULL, 16);
 
 	if (cnt + blk > limit) {
 		printf("Read out of range\n");
@@ -87,5 +90,5 @@ U_BOOT_CMD(
 	read,	7,	0,	do_read,
 	"Load binary data from a partition",
 	"<interface> <dev[:part]> addr blk# cnt\n"
-	"read <interface> <dev> <partlabel> addr blk# cnt"
+	"read <interface> <dev> <partlabel> addr blk# cnt - use 'end' in place of cnt to read the whole partition"
 );
