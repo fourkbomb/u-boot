@@ -65,35 +65,38 @@
 #define CONFIG_IPADDR 192.168.168.2
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
+	"fitloadaddr=0x50000000\0" /* load address of FIT image */\
 	"nc=" \
 		"setenv stdout nc;setenv stdin nc\0" \
 	"sd=" /* load kernel from SD card */\
-		"mmc rescan; mmc dev 1; mmc read 0x50000000 0x800 0xa000;" \
+		"mmc rescan; mmc dev 1; mmc read ${fitloadaddr} 0x800 0xa000;" \
 		"run bootimage;\0" \
 	"sdupdate=" /* install updated u-boot from partitioned SD card */ \
-		"mmc dev 1 && mmc read 0x50000000 0xa800 0x1000 && " \
-		"mmc dev 0 1 && mmc write 0x50000000 0x0 0x1000;\0" \
+		"mmc dev 1 && mmc read ${fitloadaddr} 0xa800 0x1000 && " \
+		"mmc dev 0 1 && mmc write ${fitloadaddr} 0x0 0x1000;\0" \
 	"bootsdupdate=" /* install updated u-boot from bootable SD card */ \
-		"mmc dev 1 && mmc read 0x50000000 0x1 0x1000 &&" \
-		"mmc dev 0 1 && mmc write 0x50000000 0x0 0x1000;\0" \
+		"mmc dev 1 && mmc read ${fitloadaddr} 0x1 0x1000 &&" \
+		"mmc dev 0 1 && mmc write ${fitloadaddr} 0x0 0x1000;\0" \
 	"bootimage=" /* Boot loaded image */ \
-		"run setbootargs; if test ${fit_config} = \"\"; then; bootm 0x50000000; else; bootm 0x50000000#${fit_config}${lcd_overlay}; fi\0" \
+		"run setbootargs; if test ${fit_config} = \"\"; then; bootm ${fitloadaddr}; else; bootm ${fitloadaddr}#${fit_config}${lcd_overlay}; fi\0" \
 	"mmcboot=" /* Command to boot OS from eMMC */ \
-		"read mmc 0 boot 0x50000000 0x0 end && run bootimage; run fastboot\0" \
+		"read mmc 0 boot ${fitloadaddr} 0x0 end && run bootimage; run fastboot\0" \
 	"mmcrecovery=" /* Command to boot recovery from eMMC */ \
-		"read mmc 0 recovery 0x50000000 0x0 end && run bootimage; run fastboot\0" \
+		"read mmc 0 recovery ${fitloadaddr} 0x0 end && run bootimage; run fastboot\0" \
 	"autoboot=run mmcboot\0" /* Run on normal boot */ \
 	"recoveryboot=run mmcrecovery\0" /* Run on recovery keycombo/INFORM3 value */ \
-	"fastboot=fastboot 0; run autoboot\0" /* Run on fastboot keycombo/INFORM3 value */ \
+	/* fastboot may have wrapped our FIT image in an Android boot.img, which means the FIT will be one page (2048 bytes by default) past ${fitloadaddr} */ \
+	"fastboot_bootcmd=if fdt addr ${fitloadaddr}; then; else; setexpr fitloadaddr ${fitloadaddr} + 0x800; fdt addr ${fitloadaddr}; fi; run bootimage\0" \
+	"fastboot=mw ${fitloadaddr} 0x0 0x100; fastboot -l ${fitloadaddr} 0; run autoboot\0" /* Run on fastboot keycombo/INFORM3 value */ \
 	"readsb20=setexpr.l h01 *0x50001fb0 && setexpr.l h02 *0x50001fb4 && setexpr.l h03 *0x50001fb8\0" /* In a valid BL1, this will be "SB20_CONTEXT" */ \
 	"checksb20=test ${h01} = 30324253 && test ${h02} = 4e4f435f && test ${h03} = 54584554\0" \
 	"clearsb20=env delete h01 h02 h03\0" \
 	"dommcupdate=" /* install u-boot in bootloader partition to actual partition */ \
-		"read mmc 0 bootloader 0x50000000 0x0 end &&" \
-		"run readsb20 && run checksb20 && mmc dev 0 1 && mmc write 0x50000000 0x0 0x1000 && run clearsb20\0" \
+		"read mmc 0 bootloader ${fitloadaddr} 0x0 end &&" \
+		"run readsb20 && run checksb20 && mmc dev 0 1 && mmc write ${fitloadaddr} 0x0 0x1000 && run clearsb20\0" \
 	"mmcupdate=if run dommcupdate; then echo Bootloader upgrade succeeded; else echo Bootloader upgrade failed.; fi\0" \
 	"bootargs=console=ttySAC2,115200\0" \
-	"readfitbootargs=fdt addr 0x50000000; fdt get value newargs / cmdline && setenv bootargs ${bootargs} ${newargs}\0" \
+	"readfitbootargs=fdt addr ${fitloadaddr}; fdt get value newargs / cmdline && setenv bootargs ${bootargs} ${newargs}\0" \
 	"setbootargs=run readfitbootargs; setenv bootargs ${bootargs} androidboot.mode=${bootmode} androidboot.revision=${board_rev} androidboot.serialno=${serial#}\0" \
 	"machid=eb5\0" \
 
