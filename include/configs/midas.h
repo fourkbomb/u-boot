@@ -102,7 +102,6 @@
 
 #include <linux/sizes.h>
 
-#define CONFIG_SERIAL2
 #define CONFIG_BAUDRATE		115200
 
 #endif
