@@ -38,19 +38,20 @@ static inline int exynos4412_get_rev(void)
 #define COREM0_RATIO	0x2
 #define CORE_RATIO	0x0
 
+#define CLK_DIV_CPU0_VAL        ((CORE2_RATIO << 28)    \
+								| (APLL_RATIO << 24)    \
+								| (PCLK_DBG_RATIO << 20)\
+								| (ATB_RATIO << 16)     \
+								| (PERIPH_RATIO <<12)   \
+								| (COREM1_RATIO << 8)   \
+								| (COREM0_RATIO << 4)   \
+								| (CORE_RATIO))
+
+
 /* CLK_DIV_CPU1 */
 #define CORES_RATIO	0x3
 #define HPM_RATIO	0x0
 #define COPY_RATIO	0x3
-
-#define CLK_DIV_CPU0_VAL        ((CORE2_RATIO << 28)    \
-                                | (APLL_RATIO << 24)    \
-                                | (PCLK_DBG_RATIO << 20)\
-                                | (ATB_RATIO << 16)     \
-                                | (PERIPH_RATIO <<12)   \
-				| (COREM1_RATIO << 8)   \
-                                | (COREM0_RATIO << 4)   \
-                                | (CORE_RATIO))
 
 #define CLK_DIV_CPU1_VAL	((CORES_RATIO << 8) \
                                 |  (HPM_RATIO << 4) \
@@ -68,18 +69,26 @@ static inline int exynos4412_get_rev(void)
 #define AFC(x)		((x) << 0)
 
 /* MPLL */
+#define MPLL_IROM_VAL 0xa0640301
+
 /* 800MHz = (0x64) * 24000000 / (3 * (1 << 0)) */
 #define MPLL_MDIV	0x64
 #define MPLL_PDIV	0x3
 #define MPLL_SDIV	0x0
-#define MPLL_CON1_VAL (RESV0 | LOCK_CON_IN(3) | LOCK_CON_DLY(8))
+
+/* For Exynos4412 Prime */
+/* 880MHz = (0x6E) * 24000000 / (3 * (1 << 0)) */
+#define MPLL_PRIME_MDIV 0x6E
+#define MPLL_PRIME_PDIV 0x3
+#define MPLL_PRIME_SDIV 0x0
+#define MPLL_CON1_VAL (DCC_ENB | LOCK_CON_IN(3) | LOCK_CON_DLY(8))
 
 /* ARM_CLOCK/APLL */
 /* 800MHz = (0x64) * 24000000 / (3 * (1 << 0)) */
 #define APLL_MDIV	0x64
 #define APLL_PDIV	0x3
 #define APLL_SDIV	0x0
-#define APLL_CON1_VAL (RESV0 | LOCK_CON_IN(3) | LOCK_CON_DLY(8))
+#define APLL_CON1_VAL (DCC_ENB | LOCK_CON_IN(3) | LOCK_CON_DLY(8))
 
 /* EPLL_CON1 / VPLL_CON1 */
 #define SELF_PF(x)	((x) << 29)
@@ -104,10 +113,17 @@ static inline int exynos4412_get_rev(void)
 #define EPLL_PDIV	0x2
 #define EPLL_SDIV	0x3
 
+/* For Exynos4412 Prime */
+/* 150MHz = (0x64) * 24000000 / (2 * (1 << 3)) */
+#define EPLL_PRIME_MDIV 0x64
+#define EPLL_PRIME_PDIV 0x2
+#define EPLL_PRIME_SDIV 0x3
+
 #define EPLL_CON1_VAL	SELF_PF(3) | MRR(6) | MFR(1)
 #define EPLL_CON2_VAL	DCC_ENB_EV
 
 /* VPLL */
+/* 108MHz = (0x48) * 24000000 / (2 * (1 << 3)) */
 #define VPLL_MDIV	0x48
 #define VPLL_PDIV	0x2
 #define VPLL_SDIV	0x3
@@ -120,9 +136,10 @@ static inline int exynos4412_get_rev(void)
 
 #define APLL_CON0_VAL	set_pll(APLL_MDIV,APLL_PDIV,APLL_SDIV)
 #define MPLL_CON0_VAL	set_pll(MPLL_MDIV,MPLL_PDIV,MPLL_SDIV)
+#define MPLL_PRIME_CON0_VAL set_pll(MPLL_PRIME_MDIV,MPLL_PRIME_PDIV,MPLL_PRIME_SDIV)
 #define EPLL_CON0_VAL	set_pll(EPLL_MDIV,EPLL_PDIV,EPLL_SDIV)
+#define EPLL_PRIME_CON0_VAL set_pll(EPLL_PRIME_MDIV,EPLL_PRIME_PDIV,EPLL_PRIME_SDIV)
 #define VPLL_CON0_VAL	set_pll(VPLL_MDIV,VPLL_PDIV,VPLL_SDIV)
-
 
 /* CLK_SRC_CPU */
 #define MUX_MPLL_USER_SEL_C(x)	((x) << 24) /* 0: FINPLL, 1: FOUTMPLL */
@@ -149,10 +166,10 @@ static inline int exynos4412_get_rev(void)
 #define COPY2_RATIO		0x0
 #define DMCP_RATIO		0x1
 #define DMCD_RATIO		0x1
-#define DMC_RATIO		0x7
+#define DMC_RATIO		0x2
 #define DPHY_RATIO		0x1
 #define ACP_PCLK_RATIO		0x1
-#define ACP_RATIO		0x7
+#define ACP_RATIO		0x3
 
 #define CLK_DIV_DMC0_VAL	((CORE_TIMERS_RATIO << 28) \
 				| (COPY2_RATIO << 24) \
@@ -168,7 +185,7 @@ static inline int exynos4412_get_rev(void)
 #define DVSEM_RATIO		0x7
 #define C2C_ACLK_RATIO		0x1
 #define PWI_RATIO		0x7
-#define C2C_RATIO		0x7
+#define C2C_RATIO		0x1
 #define G2D_ACP_RATIO		0x3
 
 #define CLK_DIV_DMC1_VAL	((DPM_RATIO << 24) \
@@ -207,7 +224,9 @@ static inline int exynos4412_get_rev(void)
 #define CLK_SRC_TOP1_INIT	(MUX_ACLK_400_MCUISP_SUB_SEL(0)  \
 				| MUX_ACLK_200_SUB_SEL(0)  \
 				| MUX_ACLK_266_GPS_SUB_SEL(0)  \
-				| MUX_MPLL_USER_T_SEL(0))
+				| MUX_MPLL_USER_T_SEL(0)   \
+				| MUX_ACLK_400_MCUISP_SEL(0) \
+				| MUX_ACLK_266_GPS_SEL(0))
 
 #define CLK_SRC_TOP1_PLLS	(MUX_ACLK_266_GPS_SUB_SEL(1) | MUX_MPLL_USER_T_SEL(1))
 
@@ -215,9 +234,9 @@ static inline int exynos4412_get_rev(void)
 #define ACLK_400_MCUISP_RATIO	0x1
 #define ACLK_266_GPS_RATIO	0x2
 #define ONENAND_RATIO	0x1
-#define ACLK_133_RATIO	0x7
+#define ACLK_133_RATIO	0x5
 #define ACLK_160_RATIO	0x4
-#define ACLK_100_RATIO	0xf
+#define ACLK_100_RATIO	0x7
 #define ACLK_200_RATIO	0x4
 
 #define CLK_DIV_TOP_VAL	((ACLK_400_MCUISP_RATIO << 24) \
@@ -237,7 +256,7 @@ static inline int exynos4412_get_rev(void)
 
 /* CLK_DIV_LEFTBUS */
 #define GPL_RATIO	0x1
-#define GDL_RATIO	0x7
+#define GDL_RATIO	0x3
 #define CLK_DIV_LEFTBUS_VAL	((GPL_RATIO << 4) \
 				| (GDL_RATIO))
 
@@ -245,21 +264,22 @@ static inline int exynos4412_get_rev(void)
 #define MUX_MPLL_USER_SEL_R(x)	((x) << 4) /* 0: FINPLL, 1: FOUTMPLL */
 #define MUX_GDR_SEL(x)		((x) << 0) /* 0: SCLKMPLL, 1: SCLKAPLL */
 #define CLK_SRC_RIGHTBUS_VAL	(MUX_MPLL_USER_SEL_R(1) | MUX_GDR_SEL(0))
+#define CLK_SRC_RIGHTBUS_VAL_STAT	(MUX_MPLL_USER_SEL_R(2) | MUX_GDR_SEL(1))
 
 /* CLK_DIV_RIGHTBUS */
 #define GPR_RATIO	0x1
-#define GDR_RATIO	0x7
+#define GDR_RATIO	0x3
 #define CLK_DIV_RIGHTBUS_VAL	((GPR_RATIO << 4) \
 				| (GDR_RATIO))
 
 /* APLL_LOCK */
-#define APLL_LOCK_VAL	(0x3E8)
+#define APLL_LOCK_VAL	(0x32A)
 /* MPLL_LOCK */
-#define MPLL_LOCK_VAL	(0x2F1)
+#define MPLL_LOCK_VAL	(0x32A)
 /* EPLL_LOCK */
-#define EPLL_LOCK_VAL	(0x2321)
+#define EPLL_LOCK_VAL	(0x2328)
 /* VPLL_LOCK */
-#define VPLL_LOCK_VAL	(0x2321)
+#define VPLL_LOCK_VAL	(0x1770)
 
 
 /* CLK_SRC_PERIL0 */
@@ -274,20 +294,32 @@ static inline int exynos4412_get_rev(void)
 				| UART1_SEL(6)	\
 				| UART0_SEL(6))
 
-/* CLK_DIV_PERIL0 */
-#define UART5_RATIO	8
-#define UART4_RATIO	8
-#define UART3_RATIO	8
-#define UART2_RATIO	8
-#define UART1_RATIO	8
-#define UART0_RATIO	8
+/* CLK_DIV_PERIL0
+ * UART input clock is SCLK_MPLL_USER_T / (3 + 1)
+ * on non-prime: 800MHz / 10 = 80MHz
+ * on prime: 880MHz / 11 = 80MHz
+ *
+ * We want the prime and non-prime values to be
+ * consistent so that a single image can be used
+ * across exynos4412 and exynos4412-prime boards.
+ */
+#define UART_PRIME_RATIO    11
+#define UART_RATIO          10
 
-#define CLK_DIV_PERIL0_VAL	((UART5_RATIO << 20) \
-				| (UART4_RATIO << 16) \
-				| (UART3_RATIO << 12)	\
-				| (UART2_RATIO << 8)	\
-				| (UART1_RATIO << 4)	\
-				| (UART0_RATIO))
+#define CLK_DIV_PERIL0_VAL	((UART_RATIO << 20) \
+				| (UART_RATIO << 16) \
+				| (UART_RATIO << 12)	\
+				| (UART_RATIO << 8)	\
+				| (UART_RATIO << 4)	\
+				| (UART_RATIO))
+
+#define CLK_DIV_PERIL0_PRIME_VAL	((UART_PRIME_RATIO << 20) \
+				| (UART_PRIME_RATIO << 16) \
+				| (UART_PRIME_RATIO << 12)	\
+				| (UART_PRIME_RATIO << 8)	\
+				| (UART_PRIME_RATIO << 4)	\
+				| (UART_PRIME_RATIO))
+
 
 /* CLK_SRC_LCD0 TODO: check this */
 #define MIPI0_SEL(x)		((x) << 12) /* 1: XusbXTI */
