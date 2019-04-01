@@ -45,6 +45,7 @@ void system_clock_init(void)
 {
 	struct exynos4x12_clock *clk =
 		(struct exynos4x12_clock *)samsung_get_base_clock();
+	int rev = exynos4412_get_rev();
 
 	reset_isp();
 
@@ -64,7 +65,10 @@ void system_clock_init(void)
 	writel(CLK_DIV_TOP_VAL, &clk->div_top);
 	writel(CLK_DIV_LEFTBUS_VAL, &clk->div_leftbus);
 	writel(CLK_DIV_RIGHTBUS_VAL, &clk->div_rightbus);
-	writel(CLK_DIV_PERIL0_VAL, &clk->div_peril0);
+	if (rev == EXYNOS4412_REV_PRIME)
+		writel(CLK_DIV_PERIL0_PRIME_VAL, &clk->div_peril0);
+	else
+		writel(CLK_DIV_PERIL0_VAL, &clk->div_peril0);
 
 	/* PLLs */
 	writel(APLL_LOCK_VAL, &clk->apll_lock);
@@ -81,20 +85,24 @@ void system_clock_init(void)
 
 	/* The iROM sets MPLL at 400MHz.
 	 * Skip increasing MPLL if it's not at 400MHz */
-	if (readl(&clk->mpll_con0) == 0xa0640301) {
-		/* MPLL: 800MHz */
+	if (readl(&clk->mpll_con0) == MPLL_IROM_VAL) {
+		/* MPLL: 800MHz / 880MHz on prime */
 		writel(MPLL_CON1_VAL, &clk->mpll_con1);
-		writel(MPLL_CON0_VAL, &clk->mpll_con0);
+		if (rev == EXYNOS4412_REV_PRIME)
+			writel(MPLL_PRIME_CON0_VAL, &clk->mpll_con0);
+		else
+			writel(MPLL_CON0_VAL, &clk->mpll_con0);
 	}
 
-	/* EPLL: 96MHz */
-	/* (64) * (24000000) / (2 * (1 << 3)) */
+	/* EPLL: 96MHz / 150MHz on prime */
 	writel(EPLL_CON2_VAL, &clk->epll_con2);
 	writel(EPLL_CON1_VAL, &clk->epll_con1);
-	writel(EPLL_CON0_VAL, &clk->epll_con0);
+	if (rev == EXYNOS4412_REV_PRIME)
+		writel(EPLL_PRIME_CON0_VAL, &clk->epll_con0);
+	else
+		writel(EPLL_CON0_VAL, &clk->epll_con0);
 
 	/* VPLL: 108MHz */
-	/* (72) * (24000000) / (2 * (1 << 3)) */
 	writel(VPLL_CON2_VAL, &clk->vpll_con2);
 	writel(VPLL_CON1_VAL, &clk->vpll_con1);
 	writel(VPLL_CON0_VAL, &clk->vpll_con0);
