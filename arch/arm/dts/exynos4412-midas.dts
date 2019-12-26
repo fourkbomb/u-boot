@@ -433,7 +433,7 @@
 &sdhci2 {
 	samsung,bus-width = <4>;
 	samsung,timing = <1 2 3>;
-	cd-gpios = <&gpx3 4 GPIO_ACTIVE_HIGH>;
+	cd-gpios = <&gpx3 4 GPIO_ACTIVE_LOW>;
 	status = "okay";
 };
 
