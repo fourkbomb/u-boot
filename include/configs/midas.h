@@ -29,7 +29,6 @@
 
 /* Enable SPL */
 #define CONFIG_EXYNOS_SPL
-#define CONFIG_SPL_TEXT_BASE 0x02023400
 #define CONFIG_SPL_STACK 0x02050000
 #define CONFIG_IRAM_TOP 0x02050000
 #define CONFIG_SYS_INIT_SP_ADDR 0x02050000
@@ -55,8 +54,6 @@
 /* env on eMMC, in the "bootinfo" partition */
 #define CONFIG_SYS_MMC_ENV_DEV 0
 #define CONFIG_SYS_MMC_ENV_PART 0
-#define CONFIG_ENV_SIZE (63 << 9) /* 63 blocks for env */
-#define CONFIG_ENV_OFFSET (40 << 9) /* env at LBA 40 */
 
 
 /* Boot off EMMC */
