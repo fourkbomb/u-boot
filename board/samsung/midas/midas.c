@@ -516,6 +516,7 @@ int exynos_late_init(void)
 		printf("Activating fastboot mode\n");
 		midas_led_action(LED_BLUE, LEDST_ON);
 		env_set("bootcmd", "run fastboot");
+		env_set("bootmode", "fastboot");
 		break;
 	case MODE_RECOVERY:
 		printf("Booting to recovery\n");
@@ -528,12 +529,11 @@ int exynos_late_init(void)
 		needs_network = true;
 		midas_led_action(LED_GREEN, LEDST_ON);
 		env_set("bootcmd", NULL);
+		env_set("bootmode", "console");
 		break;
 	default:
 		printf("Booting normally...\n");
 		midas_led_action(LED_GREEN | LED_RED, LEDST_ON);
-		env_set("bootcmd", "run autoboot");
-
 	}
 
 	return 0;

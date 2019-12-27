@@ -4,7 +4,14 @@
 #define CONFIG_EXYNOS4
 
 #include <configs/exynos4-common.h>
-
+#ifndef CONFIG_SPL_BUILD
+#define BOOT_TARGET_DEVICES(func) \
+	func(MMC, mmc, 1) \
+	func(MMC, mmc, 0)
+#include <config_distro_bootcmd.h>
+#else
+#define BOOTENV
+#endif
 
 /* Cache disabled */
 #define CONFIG_SYS_L2CACHE_OFF
@@ -62,6 +69,11 @@
 #define CONFIG_IPADDR 192.168.168.2
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
+	"kernel_addr_r=0x43000000\0" \
+	"fdt_addr_r=0x49000000\0" \
+	"pxefile_addr_r=0x4b000000\0" \
+	"ramdisk_addr_r=0x50000000\0" \
+	BOOTENV \
 	"fitloadaddr=0x50000000\0" /* load address of FIT image */\
 	"nc=" \
 		"setenv stdout nc;setenv stdin nc\0" \
