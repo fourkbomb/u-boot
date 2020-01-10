@@ -158,6 +158,19 @@ void init_overlays(void)
 	}
 }
 
+unsigned long midas_ram_size(void)
+{
+	if (cur_board == BOARD_MAX) {
+		cur_board = guess_board();
+	}
+
+	if (cur_board == BOARD_N7100 || cur_board == BOARD_N7105) {
+		return 0x80000000;
+	}
+
+	return 0x40000000;
+}
+
 #if defined(CONFIG_MULTI_DTB_FIT)
 int board_fit_config_name_match(const char *name)
 {

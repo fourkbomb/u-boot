@@ -9,6 +9,7 @@
 
 int midas_led_action(int mask, enum led_state_t state);
 void init_overlays(void);
+unsigned long midas_ram_size(void);
 
 #define INFORM_MAGIC 0x12345670
 enum boot_mode {

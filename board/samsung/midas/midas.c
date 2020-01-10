@@ -11,6 +11,7 @@
 #include <console.h>
 #include <dm/uclass.h>
 #include <extcon.h>
+#include <fdt_support.h>
 #include <led.h>
 #include <linux/libfdt.h>
 #include <mmc.h>
@@ -393,6 +394,8 @@ int ft_board_setup(void *blob, bd_t *bd)
 		return -EINVAL;
 	}
 
+
+	fdt_fixup_memory(blob, CONFIG_SYS_SDRAM_BASE, midas_ram_size());
 	printf("FDT set up for OS %p\n", blob);
 	return 0;
 }
