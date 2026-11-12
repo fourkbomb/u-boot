@@ -495,6 +495,14 @@ int exynos_init(void)
 	return 0;
 }
 
+static void midas_emmc_cache_off(void)
+{
+	struct mmc *mmc = find_mmc_device(0);
+
+	if (mmc)
+		mmc_cache_ctrl(mmc, 0);
+}
+
 int exynos_late_init(void)
 {
 	board_load_info();
@@ -518,6 +526,7 @@ int exynos_late_init(void)
 	case MODE_FASTBOOT:
 		printf("Activating fastboot mode\n");
 		midas_led_action(LED_BLUE, LEDST_ON);
+		midas_emmc_cache_off();
 		env_set("bootcmd", "run fastboot");
 		env_set("bootmode", "fastboot");
 		break;

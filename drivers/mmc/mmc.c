@@ -816,6 +816,20 @@ int mmc_switch(struct mmc *mmc, u8 set, u8 index, u8 value)
 	return __mmc_switch(mmc, set, index, value, true);
 }
 
+int mmc_cache_ctrl(struct mmc *mmc, u8 enable)
+{
+	if (!mmc->ext_csd)
+		return 0;
+
+	if (!(mmc->ext_csd[EXT_CSD_CACHE_SIZE] |
+	      mmc->ext_csd[EXT_CSD_CACHE_SIZE + 1] |
+	      mmc->ext_csd[EXT_CSD_CACHE_SIZE + 2] |
+	      mmc->ext_csd[EXT_CSD_CACHE_SIZE + 3]))
+		return 0;
+
+	return mmc_switch(mmc, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_CACHE_CTRL, enable);
+}
+
 #if !CONFIG_IS_ENABLED(MMC_TINY)
 static int mmc_set_card_speed(struct mmc *mmc, enum bus_mode mode,
 			      bool hsdowngrade)

@@ -208,6 +208,7 @@ static inline bool mmc_is_tuning_cmd(uint cmdidx)
 /*
  * EXT_CSD fields
  */
+#define EXT_CSD_CACHE_CTRL		32	/* R/W */
 #define EXT_CSD_ENH_START_ADDR		136	/* R/W */
 #define EXT_CSD_ENH_SIZE_MULT		140	/* R/W */
 #define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
@@ -234,6 +235,7 @@ static inline bool mmc_is_tuning_cmd(uint cmdidx)
 #define EXT_CSD_HC_ERASE_GRP_SIZE	224	/* RO */
 #define EXT_CSD_BOOT_MULT		226	/* RO */
 #define EXT_CSD_GENERIC_CMD6_TIME       248     /* RO */
+#define EXT_CSD_CACHE_SIZE		249	/* RO, 4 bytes */
 #define EXT_CSD_BKOPS_SUPPORT		502	/* RO */
 
 /*
@@ -753,6 +755,7 @@ int mmc_set_clock(struct mmc *mmc, uint clock, bool disable);
 #define MMC_CLK_DISABLE		true
 
 struct mmc *find_mmc_device(int dev_num);
+int mmc_cache_ctrl(struct mmc *mmc, u8 enable);
 int mmc_set_dev(int dev_num);
 void print_mmc_devices(char separator);
 
